@@ -56,13 +56,18 @@ package body Incr.Nodes.Tokens is
       ----------------
 
       procedure Initialize
-        (Self   : out Token'Class;
-         Value  : League.Strings.Universal_String)
+        (Self      : out Token'Class;
+         Kind      : Token_Kind;
+         Value     : League.Strings.Universal_String;
+         State     : Scanner_State;
+         Lookahead : Natural)
       is
          Now  : constant Version_Trees.Version :=
            Self.Document.History.Changing;
          Diff : Integer;
       begin
+         Self.Kind := Kind;
+
          Nodes.Constructors.Initialize (Self);
          Versioned_Strings.Initialize
            (Self.Text, League.Strings.Empty_Universal_String);
@@ -70,15 +75,16 @@ package body Incr.Nodes.Tokens is
          Versioned_Naturals.Initialize (Self.Ahead, 0);
          Versioned_Naturals.Initialize (Self.States, 0);
 
-         Versioned_Strings.Set
-           (Self    => Self.Text,
-            Value   => Value,
-            Time    => Now,
-            Changes => Diff);
-
+         Versioned_Booleans.Set (Self.Exist, True, Now, Diff);  --  UNDELETE??
          Self.Update_Local_Changes (Diff);
 
-         Versioned_Booleans.Set (Self.Exist, True, Now, Diff);  --  UNDELETE??
+         Versioned_Strings.Set (Self.Text, Value, Now, Diff);
+         Self.Update_Local_Changes (Diff);
+
+         Versioned_Naturals.Set (Self.Ahead, Lookahead, Now, Diff);
+         Self.Update_Local_Changes (Diff);
+
+         Versioned_Naturals.Set (Self.States, Natural (State), Now, Diff);
          Self.Update_Local_Changes (Diff);
       end Initialize;
 
@@ -133,6 +139,15 @@ package body Incr.Nodes.Tokens is
    begin
       return True;
    end Is_Token;
+
+   ----------
+   -- Kind --
+   ----------
+
+   not overriding function Kind (Self : Token) return Token_Kind is
+   begin
+      return Self.Kind;
+   end Kind;
 
    --------------
    -- Lookback --

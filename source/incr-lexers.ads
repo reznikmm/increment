@@ -41,25 +41,13 @@
 ------------------------------------------------------------------------------
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
-with "matreshka/league.gpr";
+--  @summary
+--  Lexical Analysis Stuff
+--
+--  @description
+--  This package provides namespace for lexical analysis algorithms
+--  and related data types.
 
-project Increment is
-
-   for Object_Dir use "../.objs";
-   for Source_Dirs use ("../source", "../source/gen");
-
-   Default_Ada_Switches :=
-     ("-gnat12", "-gnatW8", "-g");
-
-   Check_Ada_Switches := Default_Ada_Switches &
-     ("-gnatVa", "-gnatwea", "-gnaty", "-gnata");
-
-   package Compiler is
-      for Default_Switches ("ada") use Check_Ada_Switches;
-   end Compiler;
-
-   package Binder is
-      for Default_Switches ("ada") use ("-E");
-   end Binder;
-
-end Increment;
+package Incr.Lexers is
+   pragma Pure;
+end Incr.Lexers;

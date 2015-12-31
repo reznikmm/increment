@@ -44,8 +44,7 @@
 
 with League.Strings;
 
---  with Incr.Lexers.Tokens;
---  with Incr.Lexers.Types;
+with Incr.Lexers.Batch_Lexers;
 
 package Incr.Nodes.Tokens is
    --  @summary
@@ -64,6 +63,11 @@ package Incr.Nodes.Tokens is
    --  Token nodesof parse tree
 
    type Token_Access is access all Token'Class;
+
+   subtype Token_Kind is Lexers.Batch_Lexers.Rule_Index;
+
+   not overriding function Kind (Self : Token) return Token_Kind;
+   --  Return type of the token. Kind is not expected to change
 
    not overriding function Text
      (Self : Token;
@@ -90,7 +94,7 @@ package Incr.Nodes.Tokens is
       Time : Version_Trees.Version) return Natural;
    --  Get number of preceding tokens with lookahead extented over this one
 
-   type Scanner_State is new Natural;
+   subtype Scanner_State is Lexers.Batch_Lexers.State;
 
    not overriding function State
      (Self  : access Token;
@@ -98,8 +102,11 @@ package Incr.Nodes.Tokens is
 
    package Constructors is
       procedure Initialize
-        (Self   : out Token'Class;
-         Value  : League.Strings.Universal_String);
+        (Self      : out Token'Class;
+         Kind      : Token_Kind;
+         Value     : League.Strings.Universal_String;
+         State     : Scanner_State;
+         Lookahead : Natural);
 
       procedure Initialize_Ancient
         (Self    : aliased in out Token'Class;
@@ -116,6 +123,7 @@ private
    package Versioned_Naturals is new Version_Trees.Versioned_Values (Natural);
 
    type Token is new Node_With_Parent with record
+      Kind   : Token_Kind;
       Text   : Versioned_Strings.Container;
       Back   : Versioned_Naturals.Container;
       Ahead  : Versioned_Naturals.Container;
