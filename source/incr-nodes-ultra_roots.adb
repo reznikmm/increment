@@ -42,6 +42,8 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
+with Incr.Nodes.Joints;
+
 package body Incr.Nodes.Ultra_Roots is
 
    -----------
@@ -112,6 +114,16 @@ package body Incr.Nodes.Ultra_Roots is
       return False;
    end Is_Token;
 
+   ----------
+   -- Kind --
+   ----------
+
+   overriding function Kind (Self : Ultra_Root) return Node_Kind is
+      pragma Unreferenced (Self);
+   begin
+      return 0;
+   end Kind;
+
    --------------------
    -- Nested_Changes --
    --------------------
@@ -139,6 +151,26 @@ package body Incr.Nodes.Ultra_Roots is
       return null;
    end Parent;
 
+   ---------------
+   -- Set_Child --
+   ---------------
+
+   overriding procedure Set_Child
+     (Self  : in out Ultra_Root;
+      Index : Positive;
+      Value : Node_Access)
+   is
+      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+
+      Ignore : Integer;
+   begin
+      if Index /= 2 then
+         raise Constraint_Error;
+      end if;
+
+      Versioned_Nodes.Set (Self.Root, Value, Now, Ignore);
+   end Set_Child;
+
    ------------------
    -- Constructors --
    ------------------
@@ -150,7 +182,13 @@ package body Incr.Nodes.Ultra_Roots is
       ----------------
 
       procedure Initialize (Self  : out Ultra_Root'Class) is
+         Root : constant Incr.Nodes.Joints.Joint_Access :=
+           new Incr.Nodes.Joints.Joint (Self.Document, 0);
       begin
+         Incr.Nodes.Joints.Constructors.Initialize_Ancient
+           (Self     => Root.all,
+            Parent => Self'Unchecked_Access);
+
          Self.BOS := new Nodes.Tokens.Token (Self.Document);
          Nodes.Tokens.Constructors.Initialize_Ancient
            (Self   => Self.BOS.all,
@@ -161,7 +199,7 @@ package body Incr.Nodes.Ultra_Roots is
            (Self   => Self.EOS.all,
             Parent => Self'Unchecked_Access);
 
-         Versioned_Nodes.Initialize (Self.Root, null);
+         Versioned_Nodes.Initialize (Self.Root, Nodes.Node_Access (Root));
       end Initialize;
 
    end Constructors;

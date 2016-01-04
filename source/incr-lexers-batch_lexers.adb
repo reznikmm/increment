@@ -58,6 +58,8 @@ package body Incr.Lexers.Batch_Lexers is
 
       function Rule (S : State) return Rule_Index;
       pragma Inline (Rule);
+
+      Error_State : constant State := 4;
    end Tables;
 
    package body Tables is separate;
@@ -136,7 +138,7 @@ package body Incr.Lexers.Batch_Lexers is
 
          Current_State := Switch (Current_State, Char);
 
-         exit when Current_State = Error_State;
+         exit when Current_State = Tables.Error_State;
 
          Next_Rule := Rule (Current_State);
 

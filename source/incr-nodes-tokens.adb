@@ -57,7 +57,7 @@ package body Incr.Nodes.Tokens is
 
       procedure Initialize
         (Self      : out Token'Class;
-         Kind      : Token_Kind;
+         Kind      : Node_Kind;
          Value     : League.Strings.Universal_String;
          State     : Scanner_State;
          Lookahead : Natural)
@@ -144,7 +144,7 @@ package body Incr.Nodes.Tokens is
    -- Kind --
    ----------
 
-   not overriding function Kind (Self : Token) return Token_Kind is
+   overriding function Kind (Self : Token) return Node_Kind is
    begin
       return Self.Kind;
    end Kind;

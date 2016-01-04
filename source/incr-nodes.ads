@@ -72,17 +72,31 @@ package Incr.Nodes is
 
    type Node_Access is access all Node'Class;
 
+   type Node_Array is array (Positive range <>) of Node_Access;
+
    not overriding function Is_Token (Self : Node) return Boolean is abstract;
    --  Check if given node is token.
 
    not overriding function Arity (Self : Node) return Natural is abstract;
    --  Return number of node's children.
 
+   type Node_Kind is new Integer;
+   subtype Token_Kind is Node_Kind range 0 .. Node_Kind'Last;
+
+   not overriding function Kind (Self : Node) return Node_Kind is abstract;
+   --  Return type of the node. Kind is not expected to change
+
    not overriding function Child
      (Self  : Node;
       Index : Positive;
       Time  : Version_Trees.Version) return Node_Access is abstract;
    --  Get node's child by its position. Result could be null if child absent.
+
+   not overriding procedure Set_Child
+     (Self  : in out Node;
+      Index : Positive;
+      Value : Node_Access) is abstract;
+   --  Assign node's child by its position.
 
    not overriding function Nested_Changes
      (Self : Node;
@@ -129,7 +143,7 @@ package Incr.Nodes is
    --  Return first token in subtree rooted by given Node if any
 
    function Last_Token
-     (Self : aliased Node'Class;
+     (Self : aliased in out Node'Class;
       Time : Version_Trees.Version) return Tokens.Token_Access;
    --  Return last token in subtree rooted by given Node if any
 

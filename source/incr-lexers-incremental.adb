@@ -194,7 +194,7 @@ package body Incr.Lexers.Incremental is
          Self.State := Self.Token.State (Self.Now);
          Self.Token := Self.Token.Next_Token (Self.Now);
 
-         if Self.Token = Self.Token.Document.End_Of_Stream then
+         if Self.Token = null then
             return Batch_Lexers.End_Of_Input;
          end if;
 
@@ -222,7 +222,7 @@ package body Incr.Lexers.Incremental is
          return False;
       end if;
 
-      if Token = Self.Document.End_Of_Stream then
+      if Token = null then
          return True;
       end if;
 
@@ -296,7 +296,7 @@ package body Incr.Lexers.Incremental is
 
       Nodes.Tokens.Constructors.Initialize
         (Result.all,
-         Rule,
+         Nodes.Token_Kind (Rule),
          Value,
          Self.New_State,
          Self.Batch.Get_Token_Lookahead);
@@ -325,6 +325,17 @@ package body Incr.Lexers.Incremental is
          Previous  => Self.Previous,
          Reference => Self.Reference);
    end Prepare_Document;
+
+   ---------------------
+   -- Set_Batch_Lexer --
+   ---------------------
+
+   not overriding procedure Set_Batch_Lexer
+     (Self  : in out Incremental_Lexer;
+      Lexer : Batch_Lexers.Batch_Lexer_Access) is
+   begin
+      Self.Batch := Lexer;
+   end Set_Batch_Lexer;
 
    ------------------------
    -- Synchronized_Token --

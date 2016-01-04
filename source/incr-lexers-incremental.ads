@@ -77,6 +77,11 @@ package Incr.Lexers.Incremental is
 
    type Incremental_Lexer_Access is access Incremental_Lexer;
 
+   not overriding procedure Set_Batch_Lexer
+     (Self  : in out Incremental_Lexer;
+      Lexer : Batch_Lexers.Batch_Lexer_Access);
+   --  Assign batch lexer to Self.
+
    not overriding procedure Prepare_Document
      (Self      : in out Incremental_Lexer;
       Document  : Documents.Document_Access;
@@ -93,8 +98,8 @@ package Incr.Lexers.Incremental is
    --  Return first created token.
 
    not overriding function Next_New_Token
-     (Self : in out Incremental_Lexer) return Nodes.Tokens.Token_Access
-       with Pre => not Is_Synchronized (Self);
+     (Self : in out Incremental_Lexer) return Nodes.Tokens.Token_Access;
+--       with Pre => not Is_Synchronized (Self);
    --  Continue construction of new token stream. Return next created token.
    --  Should be called when not yet Is_Synchronized (Self);
 
@@ -111,7 +116,7 @@ package Incr.Lexers.Incremental is
 private
 
    type Incremental_Lexer is new Batch_Lexers.Abstract_Source with record
-      Batch       : aliased Batch_Lexers.Batch_Lexer;
+      Batch       : Batch_Lexers.Batch_Lexer_Access;
       Document    : Documents.Document_Access;
       Reference   : Version_Trees.Version;  --  Last analyzed version
       Previous    : Version_Trees.Version;  --  Version to analyze

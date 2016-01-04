@@ -53,6 +53,7 @@ package Incr.Lexers.Batch_Lexers is
 
    type Batch_Lexer is tagged limited private;
    --  Type to perform lexical analysis
+   type Batch_Lexer_Access is access all Batch_Lexer'Class;
 
    type Abstract_Source is abstract tagged limited null record;
    --  Abstract source of text for lexer
@@ -117,7 +118,6 @@ private
    type Character_Class_Array is array (Buffer_Index) of Character_Class;
 
    Error_Character : constant Character_Class := 0;
-   Error_State     : constant State := State'Last;
 
    type Batch_Lexer is tagged limited record
       Source  : Source_Access;

@@ -64,9 +64,7 @@ package Incr.Nodes.Tokens is
 
    type Token_Access is access all Token'Class;
 
-   subtype Token_Kind is Lexers.Batch_Lexers.Rule_Index;
-
-   not overriding function Kind (Self : Token) return Token_Kind;
+   overriding function Kind (Self : Token) return Node_Kind;
    --  Return type of the token. Kind is not expected to change
 
    not overriding function Text
@@ -103,7 +101,7 @@ package Incr.Nodes.Tokens is
    package Constructors is
       procedure Initialize
         (Self      : out Token'Class;
-         Kind      : Token_Kind;
+         Kind      : Node_Kind;
          Value     : League.Strings.Universal_String;
          State     : Scanner_State;
          Lookahead : Natural);
@@ -123,7 +121,7 @@ private
    package Versioned_Naturals is new Version_Trees.Versioned_Values (Natural);
 
    type Token is new Node_With_Parent with record
-      Kind   : Token_Kind;
+      Kind   : Node_Kind;
       Text   : Versioned_Strings.Container;
       Back   : Versioned_Naturals.Container;
       Ahead  : Versioned_Naturals.Container;
@@ -138,6 +136,11 @@ private
      (Self  : Token;
       Index : Positive;
       Time  : Version_Trees.Version) return Node_Access;
+
+   overriding procedure Set_Child
+     (Self  : in out Token;
+      Index : Positive;
+      Value : Node_Access) is null;
 
    overriding function Nested_Changes
      (Self : Token;

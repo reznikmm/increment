@@ -60,6 +60,8 @@ package Incr.Version_Trees is
    --  * changing    - version where current chages are performed.
    --  Only read-write version of the document is its changing version.
 
+   type Version_Tree_Access is access all Version_Tree'Class;
+
    not overriding function Prehistoric (Self : Version_Tree) return Version;
    --  Root represents 'begin of time' version of a document.
 

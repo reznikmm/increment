@@ -1174,7 +1174,8 @@ package body Tables is
       S_1'Access, S_1'Access, S_1'Access, S_1'Access,
       S_1'Access, S_1'Access, S_1'Access, S_1'Access);
 
-   Switch_Table : constant array (State range 0 .. 3, Character_Class) of State
+   Switch_Table : constant array (State range 0 .. 3,
+                                  Character_Class range 0 .. 4) of State
      :=
      (0 =>
         (1 => 1, 2 => 2, 3 => 3, others => 4),
@@ -1185,7 +1186,7 @@ package body Tables is
       3 =>
         (3 => 3, others => 4));
 
-   Rule_Table : constant array (State) of
+   Rule_Table : constant array (State range 0 .. 3) of
      Rule_Index :=
      (1 => 1, 2 => 2, 3 => 3, others => 0);
 

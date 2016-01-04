@@ -132,7 +132,7 @@ package body Incr.Nodes is
    ----------------
 
    function Last_Token
-     (Self : aliased Node'Class;
+     (Self : aliased in out Node'Class;
       Time : Version_Trees.Version) return Tokens.Token_Access
    is
       Child : Node_Access;
@@ -145,6 +145,8 @@ package body Incr.Nodes is
          else
             return Child.Last_Token (Time);
          end if;
+      elsif Self.Is_Token then
+         return Tokens.Token'Class (Self)'Access;
       else
          return null;
       end if;

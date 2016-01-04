@@ -48,7 +48,7 @@ with Incr.Nodes.Ultra_Roots;
 package body Incr.Documents is
 
    package body Constructors is
-      procedure Initialize (Self  : aliased in out Document) is
+      procedure Initialize (Self  : aliased in out Document'Class) is
          Child : constant Nodes.Ultra_Roots.Ultra_Root_Access :=
            new Nodes.Ultra_Roots.Ultra_Root (Self'Unchecked_Access);
       begin

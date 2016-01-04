@@ -73,10 +73,17 @@ private
 
    overriding function Arity (Self : Ultra_Root) return Natural;
 
+   overriding function Kind (Self : Ultra_Root) return Node_Kind;
+
    overriding function Child
      (Self  : Ultra_Root;
       Index : Positive;
       Time  : Version_Trees.Version) return Node_Access;
+
+   overriding procedure Set_Child
+     (Self  : in out Ultra_Root;
+      Index : Positive;
+      Value : Node_Access);
 
    overriding function Nested_Changes
      (Self : Ultra_Root;
