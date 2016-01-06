@@ -22,13 +22,21 @@ private
    type Versioned_Node_Array is array (Positive range <>) of
      Versioned_Nodes.Container;
 
+   type Cached_Integer is record
+      Value : Integer := -1;  --  -1 means invalid cache
+      Time  : Version_Trees.Version;
+   end record;
+
+   type Cached_Spans is array (Span_Kinds) of Cached_Integer;
+
    type Joint (Document : Documents.Document_Access;
                Arity    : Natural) is
      new Node_With_Parent (Document) with
    record
-      Kind : Node_Kind;
-      Kids : Versioned_Node_Array (1 .. Arity);
-      NC   : Versioned_Booleans.Container;
+      Kind       : Node_Kind;
+      Kids       : Versioned_Node_Array (1 .. Arity);
+      NC         : Versioned_Booleans.Container;
+      Span_Cache : Cached_Spans;
    end record;
 
    overriding function Arity (Self : Joint) return Natural;
@@ -51,6 +59,11 @@ private
      (Self : Joint;
       From : Version_Trees.Version;
       To   : Version_Trees.Version) return Boolean;
+
+   overriding function Span
+     (Self : aliased in out Joint;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural;
 
    overriding procedure On_Commit (Self : in out Joint);
 

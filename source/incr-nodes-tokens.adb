@@ -42,6 +42,7 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
+with Ada.Characters.Wide_Wide_Latin_1;
 
 package body Incr.Nodes.Tokens is
 
@@ -233,6 +234,29 @@ package body Incr.Nodes.Tokens is
       Self.Update_Local_Changes (Diff);
    end Set_Text;
 
+   ----------
+   -- Span --
+   ----------
+
+   overriding function Span
+     (Self : aliased in out Token;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural is
+   begin
+      case Kind is
+         when Text_Length =>
+            return Tokens.Text (Self, Time).Length;
+         when Token_Count =>
+            return 1;
+         when Line_Count =>
+            if Self'Access = Self.Document.End_Of_Stream then
+               return 1;
+            else
+               return Tokens.Text (Self, Time).Count
+                 (Ada.Characters.Wide_Wide_Latin_1.LF);
+            end if;
+      end case;
+   end Span;
    -----------
    -- State --
    -----------

@@ -155,4 +155,47 @@ package body Incr.Nodes.Joints is
       Self.Update_Local_Changes (Diff);
    end Set_Child;
 
+   ----------
+   -- Span --
+   ----------
+
+   overriding function Span
+     (Self : aliased in out Joint;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural
+   is
+      use type Version_Trees.Version;
+
+      function Get_Span return Natural;
+
+      --------------
+      -- Get_Span --
+      --------------
+
+      function Get_Span return Natural is
+         Result : Natural := 0;
+      begin
+         for J in 1 .. Self.Arity loop
+            Result := Result + Self.Child (J, Time).Span (Kind, Time);
+         end loop;
+
+         return Result;
+      end Get_Span;
+
+      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+
+      Cached : Cached_Integer renames Self.Span_Cache (Kind);
+   begin
+      if Time = Now then
+         raise Constraint_Error with "Not implemented";
+      end if;
+
+      if Cached.Value = -1 or else Cached.Time /= Time then
+         Cached.Value := Get_Span;
+         Cached.Time := Time;
+      end if;
+
+      return Cached.Value;
+   end Span;
+
 end Incr.Nodes.Joints;

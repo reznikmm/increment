@@ -117,4 +117,9 @@ private
      (Self : in out Ultra_Root;
       Diff : Integer) is null;
 
+   overriding function Span
+     (Self : aliased in out Ultra_Root;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural;
+
 end Incr.Nodes.Ultra_Roots;

@@ -147,4 +147,9 @@ private
       From : Version_Trees.Version;
       To   : Version_Trees.Version) return Boolean;
 
+   overriding function Span
+     (Self : aliased in out Token;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural;
+
 end Incr.Nodes.Tokens;

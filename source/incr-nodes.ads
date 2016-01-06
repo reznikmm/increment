@@ -136,6 +136,14 @@ package Incr.Nodes is
       Value : Boolean := True) is abstract;
    --  Set given transient flag on the node
 
+   type Span_Kinds is (Text_Length, Token_Count, Line_Count);
+
+   not overriding function Span
+     (Self : aliased in out Node;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural is abstract;
+   --  Length of the node in term of character/line/token count
+
    function First_Token
      (Self : aliased in out Node'Class;
       Time : Version_Trees.Version)

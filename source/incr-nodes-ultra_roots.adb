@@ -171,6 +171,23 @@ package body Incr.Nodes.Ultra_Roots is
       Versioned_Nodes.Set (Self.Root, Value, Now, Ignore);
    end Set_Child;
 
+   overriding function Span
+     (Self : aliased in out Ultra_Root;
+      Kind : Span_Kinds;
+      Time : Version_Trees.Version) return Natural
+   is
+      Root_Span : constant Natural := Self.Child (2, Time).Span (Kind, Time);
+   begin
+      case Kind is
+         when Text_Length =>
+            return Root_Span + 1;  --  including end_of_stream character
+         when Token_Count =>
+            return Root_Span + 2;  --  including sentinel tokens
+         when Line_Count =>
+            return Root_Span + 1;  --  including end_of_stream character
+      end case;
+   end Span;
+
    ------------------
    -- Constructors --
    ------------------
