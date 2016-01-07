@@ -1,0 +1,7 @@
+%%
+
+\n              {New_Line}
+[a-zA-Z]+       {Ident}
+[0-9]+          {Number}
+
+%%

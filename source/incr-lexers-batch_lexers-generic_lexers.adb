@@ -42,67 +42,74 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-package body Incr.Lexers.Batch_Lexers is
+package body Incr.Lexers.Batch_Lexers.Generic_Lexers is
 
-   -------------------------
-   -- Get_Start_Condition --
-   -------------------------
+   ---------------
+   -- Get_Token --
+   ---------------
 
-   function Get_Start_Condition
-     (Self : Batch_Lexer'Class) return State is
+   overriding procedure Get_Token
+     (Self   : access Batch_Lexer;
+      Result : out Rule_Index)
+   is
+      use type Matreshka.Internals.Unicode.Code_Unit_32;
+      Input         : Wide_Wide_Character;
+      Code_Unit     : Matreshka.Internals.Unicode.Code_Unit_32;
+      Pos           : Buffer_Index := 1;
+      Current_State : State := Self.Start;
+      Char          : Character_Class;
+      Next_Rule     : Rule_Index;
    begin
-      return Self.Start;
-   end Get_Start_Condition;
+      if Self.To = 1 and then Self.Buffer (1) = End_Of_Input then
+         Result := 0;
+         return;
+      end if;
 
-   --------------
-   -- Get_Text --
-   --------------
+      Self.Classes (1 .. Self.Next - Self.To - 1) :=
+        Self.Classes (Self.To + 1 .. Self.Next - 1);
 
-   function Get_Text
-     (Self : Batch_Lexer'Class) return League.Strings.Universal_String is
-   begin
-      return League.Strings.To_Universal_String (Self.Buffer (1 .. Self.To));
-   end Get_Text;
+      Self.Buffer (1 .. Self.Next - Self.To - 1) :=
+        Self.Buffer (Self.To + 1 .. Self.Next - 1);
 
-   ----------------------
-   -- Get_Token_Length --
-   ----------------------
+      Self.Next := Self.Next - Self.To;
+      Self.To   := 0;
+      Self.Rule := 0;
 
-   function Get_Token_Length (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.To;
-   end Get_Token_Length;
+      loop
+         if Pos = Self.Next then
+            Input := Self.Source.Get_Next;
+            Self.Buffer (Pos) := Input;
+            Code_Unit := Wide_Wide_Character'Pos (Input);
 
-   -------------------------
-   -- Get_Token_Lookahead --
-   -------------------------
+            if Input in End_Of_Input then
+               Self.Classes (Pos) := Error_Character;
+            else
+               Self.Classes (Pos) := To_Class (Code_Unit);
+            end if;
 
-   function Get_Token_Lookahead (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.Next - 1;
-   end Get_Token_Lookahead;
+            Self.Next := Self.Next + 1;
+         end if;
 
-   ----------------
-   -- Set_Source --
-   ----------------
+         Char := Self.Classes (Pos);
 
-   procedure Set_Source
-     (Self   : in out Batch_Lexer'Class;
-      Source : not null Source_Access) is
-   begin
-      Self.Source := Source;
-      Self.Next := 1;
-      Self.To := 0;
-   end Set_Source;
+         exit when Char = Error_Character;
 
-   -------------------------
-   -- Set_Start_Condition --
-   -------------------------
+         Current_State := Switch (Current_State, Char);
 
-   procedure Set_Start_Condition
-     (Self : in out Batch_Lexer'Class; Condition : State) is
-   begin
-      Self.Start := Condition;
-   end Set_Start_Condition;
+         exit when Current_State = Error_State;
 
-end Incr.Lexers.Batch_Lexers;
+         Next_Rule := Rule (Current_State);
+
+         if Next_Rule /= 0 then
+            Self.Rule := Next_Rule;
+            Self.To := Pos;
+         end if;
+
+         Pos := Pos + 1;
+      end loop;
+
+      Result := Self.Rule;
+   end Get_Token;
+
+
+end Incr.Lexers.Batch_Lexers.Generic_Lexers;

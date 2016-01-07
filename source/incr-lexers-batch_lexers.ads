@@ -51,7 +51,7 @@ package Incr.Lexers.Batch_Lexers is
    --  @description
    --  This package provides batch lexical analyser and related types.
 
-   type Batch_Lexer is tagged limited private;
+   type Batch_Lexer is abstract tagged limited private;
    --  Type to perform lexical analysis
    type Batch_Lexer_Access is access all Batch_Lexer'Class;
 
@@ -90,9 +90,9 @@ package Incr.Lexers.Batch_Lexers is
    type Rule_Index is new Natural;
    --  Recognized token rule, 0 for end of stream or error.
 
-   procedure Get_Token
-     (Self   : access Batch_Lexer'Class;
-      Result : out Rule_Index);
+   not overriding procedure Get_Token
+     (Self   : access Batch_Lexer;
+      Result : out Rule_Index) is abstract;
    --  Recognize next token in the stream and return its rule number.
 
    function Get_Text
@@ -106,6 +106,8 @@ package Incr.Lexers.Batch_Lexers is
    --  Return number of character seen by lexer after end of the last
    --  recognized token.
 
+   type Character_Class is new Natural;
+
 private
 
    Buffer_Size : constant := 1024;
@@ -113,13 +115,11 @@ private
 
    subtype Buffer_Index is Positive range 1 .. Buffer_Size;
 
-   type Character_Class is new Natural;
-
    type Character_Class_Array is array (Buffer_Index) of Character_Class;
 
    Error_Character : constant Character_Class := 0;
 
-   type Batch_Lexer is tagged limited record
+   type Batch_Lexer is abstract tagged limited record
       Source  : Source_Access;
       Start   : State := INITIAL;
       Next    : Buffer_Index := 1;  --  First empty position in Buffer

@@ -42,67 +42,86 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-package body Incr.Lexers.Batch_Lexers is
+with Incr.Nodes.Joints;
 
-   -------------------------
-   -- Get_Start_Condition --
-   -------------------------
+package body Tests.Parser_Data is
 
-   function Get_Start_Condition
-     (Self : Batch_Lexer'Class) return State is
+   Action_Data : aliased constant P.Action_Table :=
+     (1 => ((P.Reduce, 2), (P.Shift, 4),  (P.Shift, 3),  (P.Shift, 2)),
+      2 => (0 .. 3 => (P.Reduce, 4)),
+      3 => (0 .. 3 => (P.Reduce, 5)),
+      4 => (0 .. 3 => (P.Reduce, 3)),
+      5 => (0 .. 3 => (Kind => P.Finish)),
+      6 => (0 .. 3 => (P.Reduce, 7)),
+      7 => ((P.Reduce, 1), (P.Shift, 4),  (P.Shift, 3),  (P.Shift, 2)),
+      8 => (0 .. 3 => (P.Reduce, 6)));
+
+
+   State_Data : aliased constant P.State_Table :=
+     (1 => (1 => 5, 2 => 6, 3 => 7),
+      2 .. 6 => (1 .. 3 => 0),
+      7 => (1 => 0, 2 => 8, 3 => 0),
+      8 => (1 .. 3 => 0));
+
+   Count_Data : aliased constant P.Parts_Count_Table :=
+     (1 => 1, 2 => 0, 3 => 1, 4 => 1, 5 => 1, 6 => 2, 7 => 1);
+
+   NT : constant array (P.Production_Index range 1 .. 7) of
+     Incr.Nodes.Node_Kind :=
+       (1 .. 2 => 1, 3 .. 5 => 2, 6 .. 7 => 3);
+
+   -------------
+   -- Actions --
+   -------------
+
+   overriding function Actions
+     (Self : Provider) return P.Action_Table_Access
+   is
+      pragma Unreferenced (Self);
    begin
-      return Self.Start;
-   end Get_Start_Condition;
+      return Action_Data'Access;
+   end Actions;
 
-   --------------
-   -- Get_Text --
-   --------------
+   -----------------
+   -- Create_Node --
+   -----------------
 
-   function Get_Text
-     (Self : Batch_Lexer'Class) return League.Strings.Universal_String is
+   overriding function Create_Node
+     (Self     : aliased in out Node_Factory;
+      Prod     : P.Production_Index;
+      Children : Incr.Nodes.Node_Array) return Incr.Nodes.Node_Access
+   is
+      Kind   : constant Incr.Nodes.Node_Kind := NT (Prod);
+      Result : constant Incr.Nodes.Joints.Joint_Access :=
+        new Incr.Nodes.Joints.Joint (Self.Document, Children'Length);
    begin
-      return League.Strings.To_Universal_String (Self.Buffer (1 .. Self.To));
-   end Get_Text;
+      Incr.Nodes.Joints.Constructors.Initialize (Result.all, Kind, Children);
 
-   ----------------------
-   -- Get_Token_Length --
-   ----------------------
+      return Incr.Nodes.Node_Access (Result);
+   end Create_Node;
 
-   function Get_Token_Length (Self : Batch_Lexer'Class) return Positive is
+   ------------
+   -- States --
+   ------------
+
+   overriding function States
+     (Self : Provider) return P.State_Table_Access
+   is
+      pragma Unreferenced (Self);
    begin
-      return Self.To;
-   end Get_Token_Length;
+      return State_Data'Access;
+   end States;
 
-   -------------------------
-   -- Get_Token_Lookahead --
-   -------------------------
+   -----------------
+   -- Part_Counts --
+   -----------------
 
-   function Get_Token_Lookahead (Self : Batch_Lexer'Class) return Positive is
+   overriding function Part_Counts
+     (Self : Provider) return P.Parts_Count_Table_Access
+   is
+      pragma Unreferenced (Self);
    begin
-      return Self.Next - 1;
-   end Get_Token_Lookahead;
+      return Count_Data'Access;
+   end Part_Counts;
 
-   ----------------
-   -- Set_Source --
-   ----------------
-
-   procedure Set_Source
-     (Self   : in out Batch_Lexer'Class;
-      Source : not null Source_Access) is
-   begin
-      Self.Source := Source;
-      Self.Next := 1;
-      Self.To := 0;
-   end Set_Source;
-
-   -------------------------
-   -- Set_Start_Condition --
-   -------------------------
-
-   procedure Set_Start_Condition
-     (Self : in out Batch_Lexer'Class; Condition : State) is
-   begin
-      Self.Start := Condition;
-   end Set_Start_Condition;
-
-end Incr.Lexers.Batch_Lexers;
+end Tests.Parser_Data;

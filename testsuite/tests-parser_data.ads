@@ -42,67 +42,30 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-package body Incr.Lexers.Batch_Lexers is
+with Incr.Documents;
+with Incr.Nodes;
+with Incr.Parsers.Incremental;
 
-   -------------------------
-   -- Get_Start_Condition --
-   -------------------------
+package Tests.Parser_Data is
+   package P renames Incr.Parsers.Incremental.Parser_Data_Providers;
 
-   function Get_Start_Condition
-     (Self : Batch_Lexer'Class) return State is
-   begin
-      return Self.Start;
-   end Get_Start_Condition;
+   type Provider is new P.Parser_Data_Provider with null record;
 
-   --------------
-   -- Get_Text --
-   --------------
+   overriding function Actions
+     (Self : Provider) return P.Action_Table_Access;
 
-   function Get_Text
-     (Self : Batch_Lexer'Class) return League.Strings.Universal_String is
-   begin
-      return League.Strings.To_Universal_String (Self.Buffer (1 .. Self.To));
-   end Get_Text;
+   overriding function States
+     (Self : Provider) return P.State_Table_Access;
 
-   ----------------------
-   -- Get_Token_Length --
-   ----------------------
+   overriding function Part_Counts
+     (Self : Provider) return P.Parts_Count_Table_Access;
 
-   function Get_Token_Length (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.To;
-   end Get_Token_Length;
+   type Node_Factory (Document : Incr.Documents.Document_Access) is
+     new P.Node_Factory with null record;
 
-   -------------------------
-   -- Get_Token_Lookahead --
-   -------------------------
+   overriding function Create_Node
+     (Self     : aliased in out Node_Factory;
+      Prod     : P.Production_Index;
+      Children : Incr.Nodes.Node_Array) return Incr.Nodes.Node_Access;
 
-   function Get_Token_Lookahead (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.Next - 1;
-   end Get_Token_Lookahead;
-
-   ----------------
-   -- Set_Source --
-   ----------------
-
-   procedure Set_Source
-     (Self   : in out Batch_Lexer'Class;
-      Source : not null Source_Access) is
-   begin
-      Self.Source := Source;
-      Self.Next := 1;
-      Self.To := 0;
-   end Set_Source;
-
-   -------------------------
-   -- Set_Start_Condition --
-   -------------------------
-
-   procedure Set_Start_Condition
-     (Self : in out Batch_Lexer'Class; Condition : State) is
-   begin
-      Self.Start := Condition;
-   end Set_Start_Condition;
-
-end Incr.Lexers.Batch_Lexers;
+end Tests.Parser_Data;

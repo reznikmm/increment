@@ -42,67 +42,122 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-package body Incr.Lexers.Batch_Lexers is
+with Ada.Wide_Wide_Text_IO;
 
-   -------------------------
-   -- Get_Start_Condition --
-   -------------------------
+with League.Strings;
 
-   function Get_Start_Condition
-     (Self : Batch_Lexer'Class) return State is
+with Incr.Documents;
+with Incr.Lexers.Batch_Lexers;
+with Incr.Lexers.Incremental;
+with Incr.Nodes.Tokens;
+with Incr.Parsers.Incremental;
+with Incr.Version_Trees;
+
+with Tests.Lexers;
+with Tests.Parser_Data;
+
+procedure Tests.Driver is
+
+   procedure Dump
+     (Node : Incr.Nodes.Node_Access;
+      Indent : Wide_Wide_String);
+
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump
+     (Node : Incr.Nodes.Node_Access;
+      Indent : Wide_Wide_String)
+   is
+      procedure Print;
+
+      Now : Incr.Version_Trees.Version;
+
+      procedure Print is
+      begin
+         Ada.Wide_Wide_Text_IO.Put (" node_kind='");
+         Ada.Wide_Wide_Text_IO.Put
+           (Incr.Nodes.Node_Kind'Wide_Wide_Image (Node.Kind));
+         Ada.Wide_Wide_Text_IO.Put ("' nested_changes='");
+         Ada.Wide_Wide_Text_IO.Put
+           (Boolean'Wide_Wide_Image (Node.Nested_Changes (Now, Now)));
+      end Print;
+
    begin
-      return Self.Start;
-   end Get_Start_Condition;
+      Ada.Wide_Wide_Text_IO.Put (Indent);
 
-   --------------
-   -- Get_Text --
-   --------------
+      if Node in null then
+         Ada.Wide_Wide_Text_IO.Put_Line ("<null/>");
+         return;
+      end if;
 
-   function Get_Text
-     (Self : Batch_Lexer'Class) return League.Strings.Universal_String is
-   begin
-      return League.Strings.To_Universal_String (Self.Buffer (1 .. Self.To));
-   end Get_Text;
+      Now := Node.Document.History.Changing;
 
-   ----------------------
-   -- Get_Token_Length --
-   ----------------------
+      if Node.Is_Token then
+         declare
+            Token : constant Incr.Nodes.Tokens.Token_Access :=
+              Incr.Nodes.Tokens.Token_Access (Node);
+         begin
+            Ada.Wide_Wide_Text_IO.Put ("<token ");
+            Print;
+            Ada.Wide_Wide_Text_IO.Put ("'>");
+            Ada.Wide_Wide_Text_IO.Put (Token.Text (Now).To_Wide_Wide_String);
+            Ada.Wide_Wide_Text_IO.Put_Line ("</token>");
+         end;
+      else
+         Ada.Wide_Wide_Text_IO.Put ("<node ");
+         Print;
+         Ada.Wide_Wide_Text_IO.Put_Line ("'>");
 
-   function Get_Token_Length (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.To;
-   end Get_Token_Length;
+         for J in 1 .. Node.Arity loop
+            Dump (Node.Child (J, Now), Indent & "  ");
+         end loop;
 
-   -------------------------
-   -- Get_Token_Lookahead --
-   -------------------------
+         Ada.Wide_Wide_Text_IO.Put (Indent);
+         Ada.Wide_Wide_Text_IO.Put_Line ("</node>");
+      end if;
+   end Dump;
 
-   function Get_Token_Lookahead (Self : Batch_Lexer'Class) return Positive is
-   begin
-      return Self.Next - 1;
-   end Get_Token_Lookahead;
+   History : constant Incr.Version_Trees.Version_Tree_Access :=
+     new Incr.Version_Trees.Version_Tree;
 
-   ----------------
-   -- Set_Source --
-   ----------------
+   Document : constant Incr.Documents.Document_Access :=
+     new Incr.Documents.Document (History);
 
-   procedure Set_Source
-     (Self   : in out Batch_Lexer'Class;
-      Source : not null Source_Access) is
-   begin
-      Self.Source := Source;
-      Self.Next := 1;
-      Self.To := 0;
-   end Set_Source;
+   Batch_Lexer : constant Incr.Lexers.Batch_Lexers.Batch_Lexer_Access :=
+     new Tests.Lexers.Test_Lexers.Batch_Lexer;
 
-   -------------------------
-   -- Set_Start_Condition --
-   -------------------------
+   Incr_Lexer : constant Incr.Lexers.Incremental.Incremental_Lexer_Access :=
+     new Incr.Lexers.Incremental.Incremental_Lexer;
 
-   procedure Set_Start_Condition
-     (Self : in out Batch_Lexer'Class; Condition : State) is
-   begin
-      Self.Start := Condition;
-   end Set_Start_Condition;
+   Incr_Parser : constant Incr.Parsers.Incremental.Incremental_Parser_Access :=
+     new Incr.Parsers.Incremental.Incremental_Parser;
 
-end Incr.Lexers.Batch_Lexers;
+   Provider : constant Incr.Parsers.Incremental.Parser_Data_Providers
+     .Parser_Data_Provider_Access :=
+       new Tests.Parser_Data.Provider;
+
+   Node_Factory : constant Incr.Parsers.Incremental.Parser_Data_Providers
+     .Node_Factory_Access :=
+       new Tests.Parser_Data.Node_Factory (Document);
+begin
+   Incr.Documents.Constructors.Initialize (Document.all);
+   Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
+
+   Document.End_Of_Stream.Set_Text
+     (League.Strings.To_Universal_String ("a1"));
+
+   Document.Commit;
+
+   Dump (Document.Ultra_Root, "");
+
+   Incr_Parser.Run
+     (Lexer     => Incr_Lexer,
+      Provider  => Provider,
+      Factory   => Node_Factory,
+      Document  => Document,
+      Reference => History.Prehistoric);
+
+   Dump (Document.Ultra_Root, "");
+end Tests.Driver;
