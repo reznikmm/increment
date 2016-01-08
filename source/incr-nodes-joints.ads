@@ -7,7 +7,7 @@ package Incr.Nodes.Joints is
 
    package Constructors is
       procedure Initialize
-        (Self     : out Joint'Class;
+        (Self     : aliased out Joint'Class;
          Kind     : Node_Kind;
          Children : Node_Array);
 
@@ -51,7 +51,7 @@ private
       Time  : Version_Trees.Version) return Node_Access;
 
    overriding procedure Set_Child
-     (Self  : in out Joint;
+     (Self  : aliased in out Joint;
       Index : Positive;
       Value : Node_Access);
 

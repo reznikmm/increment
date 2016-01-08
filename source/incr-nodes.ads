@@ -93,7 +93,7 @@ package Incr.Nodes is
    --  Get node's child by its position. Result could be null if child absent.
 
    not overriding procedure Set_Child
-     (Self  : in out Node;
+     (Self  : aliased in out Node;
       Index : Positive;
       Value : Node_Access) is abstract;
    --  Assign node's child by its position.

@@ -42,6 +42,8 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
+with Ada.Containers;
+with Ada.Strings.Wide_Wide_Hash;
 with Ada.Wide_Wide_Text_IO;
 
 with League.Strings;
@@ -58,8 +60,11 @@ with Tests.Parser_Data;
 
 procedure Tests.Driver is
 
+   use type Ada.Containers.Hash_Type;
+
    procedure Dump
-     (Node : Incr.Nodes.Node_Access;
+     (Hash   : in out Ada.Containers.Hash_Type;
+      Node   : Incr.Nodes.Node_Access;
       Indent : Wide_Wide_String);
 
    ----------
@@ -67,28 +72,51 @@ procedure Tests.Driver is
    ----------
 
    procedure Dump
-     (Node : Incr.Nodes.Node_Access;
+     (Hash   : in out Ada.Containers.Hash_Type;
+      Node   : Incr.Nodes.Node_Access;
       Indent : Wide_Wide_String)
    is
       procedure Print;
+      procedure Put (Text : Wide_Wide_String);
+      procedure Put_Line (Text : Wide_Wide_String);
 
       Now : Incr.Version_Trees.Version;
 
       procedure Print is
       begin
-         Ada.Wide_Wide_Text_IO.Put (" node_kind='");
-         Ada.Wide_Wide_Text_IO.Put
+         Put (" node_kind='");
+         Put
            (Incr.Nodes.Node_Kind'Wide_Wide_Image (Node.Kind));
-         Ada.Wide_Wide_Text_IO.Put ("' nested_changes='");
-         Ada.Wide_Wide_Text_IO.Put
+         Put ("' nested_changes='");
+         Put
            (Boolean'Wide_Wide_Image (Node.Nested_Changes (Now, Now)));
       end Print;
 
+      ---------
+      -- Put --
+      ---------
+
+      procedure Put (Text : Wide_Wide_String) is
+      begin
+         Ada.Wide_Wide_Text_IO.Put (Text);
+         Hash := Hash + Ada.Strings.Wide_Wide_Hash (Text);
+      end Put;
+
+      --------------
+      -- Put_Line --
+      --------------
+
+      procedure Put_Line (Text : Wide_Wide_String) is
+      begin
+         Put (Text);
+         Ada.Wide_Wide_Text_IO.New_Line;
+      end Put_Line;
+
    begin
-      Ada.Wide_Wide_Text_IO.Put (Indent);
+      Put (Indent);
 
       if Node in null then
-         Ada.Wide_Wide_Text_IO.Put_Line ("<null/>");
+         Put_Line ("<null/>");
          return;
       end if;
 
@@ -99,23 +127,23 @@ procedure Tests.Driver is
             Token : constant Incr.Nodes.Tokens.Token_Access :=
               Incr.Nodes.Tokens.Token_Access (Node);
          begin
-            Ada.Wide_Wide_Text_IO.Put ("<token ");
+            Put ("<token ");
             Print;
-            Ada.Wide_Wide_Text_IO.Put ("'>");
-            Ada.Wide_Wide_Text_IO.Put (Token.Text (Now).To_Wide_Wide_String);
-            Ada.Wide_Wide_Text_IO.Put_Line ("</token>");
+            Put ("'>");
+            Put (Token.Text (Now).To_Wide_Wide_String);
+            Put_Line ("</token>");
          end;
       else
-         Ada.Wide_Wide_Text_IO.Put ("<node ");
+         Put ("<node ");
          Print;
-         Ada.Wide_Wide_Text_IO.Put_Line ("'>");
+         Put_Line ("'>");
 
          for J in 1 .. Node.Arity loop
-            Dump (Node.Child (J, Now), Indent & "  ");
+            Dump (Hash, Node.Child (J, Now), Indent & "  ");
          end loop;
 
-         Ada.Wide_Wide_Text_IO.Put (Indent);
-         Ada.Wide_Wide_Text_IO.Put_Line ("</node>");
+         Put (Indent);
+         Put_Line ("</node>");
       end if;
    end Dump;
 
@@ -141,6 +169,9 @@ procedure Tests.Driver is
    Node_Factory : constant Incr.Parsers.Incremental.Parser_Data_Providers
      .Node_Factory_Access :=
        new Tests.Parser_Data.Node_Factory (Document);
+
+   Hash : Ada.Containers.Hash_Type := 0;
+   V2   : Incr.Version_Trees.Version;
 begin
    Incr.Documents.Constructors.Initialize (Document.all);
    Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
@@ -150,7 +181,10 @@ begin
 
    Document.Commit;
 
-   Dump (Document.Ultra_Root, "");
+   V2 := History.Changing;
+
+   Dump (Hash, Document.Ultra_Root, "");
+   pragma Assert (Hash = 2962486295);
 
    Incr_Parser.Run
      (Lexer     => Incr_Lexer,
@@ -159,5 +193,27 @@ begin
       Document  => Document,
       Reference => History.Prehistoric);
 
-   Dump (Document.Ultra_Root, "");
+   Dump (Hash, Document.Ultra_Root, "");
+   pragma Assert (Hash = 2317793671);
+
+   Document.Commit;
+
+   Document.Start_Of_Stream.Next_Token (V2).Set_Text
+     (League.Strings.Empty_Universal_String);
+
+   Document.End_Of_Stream.Previous_Token (V2).Set_Text
+     (League.Strings.Empty_Universal_String);
+
+   Document.Commit;
+
+   Incr_Parser.Run
+     (Lexer     => Incr_Lexer,
+      Provider  => Provider,
+      Factory   => Node_Factory,
+      Document  => Document,
+      Reference => V2);
+
+   Dump (Hash, Document.Ultra_Root, "");
+   pragma Assert (Hash = 978949518);
+
 end Tests.Driver;

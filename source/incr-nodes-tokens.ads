@@ -138,7 +138,7 @@ private
       Time  : Version_Trees.Version) return Node_Access;
 
    overriding procedure Set_Child
-     (Self  : in out Token;
+     (Self  : aliased in out Token;
       Index : Positive;
       Value : Node_Access) is null;
 

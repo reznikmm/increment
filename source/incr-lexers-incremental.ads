@@ -120,7 +120,6 @@ private
       Document    : Documents.Document_Access;
       Reference   : Version_Trees.Version;  --  Last analyzed version
       Previous    : Version_Trees.Version;  --  Version to analyze
-      Now         : Version_Trees.Version;  --  Changing version
       Token       : Nodes.Tokens.Token_Access;
       Count       : Integer;  --  Number of chars piped before Token
       State       : Batch_Lexers.State;  --  Lexer State before Token

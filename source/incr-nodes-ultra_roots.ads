@@ -81,7 +81,7 @@ private
       Time  : Version_Trees.Version) return Node_Access;
 
    overriding procedure Set_Child
-     (Self  : in out Ultra_Root;
+     (Self  : aliased in out Ultra_Root;
       Index : Positive;
       Value : Node_Access);
 
@@ -111,7 +111,7 @@ private
       Flag  : Transient_Flags;
       Value : Boolean := True) is null;
 
-   overriding procedure On_Commit (Self : in out Ultra_Root) is null;
+   overriding procedure On_Commit (Self : in out Ultra_Root);
 
    overriding procedure On_Nested_Changes
      (Self : in out Ultra_Root;

@@ -138,6 +138,23 @@ package body Incr.Nodes.Ultra_Roots is
       return True;
    end Nested_Changes;
 
+   ---------------
+   -- On_Commit --
+   ---------------
+
+   overriding procedure On_Commit (Self : in out Ultra_Root) is
+      Root : constant Node_Access :=
+        Versioned_Nodes.Get (Self.Root, Self.Document.History.Changing);
+   begin
+      Self.BOS.On_Commit;
+
+      if Root /= null then
+         Root.On_Commit;
+      end if;
+
+      Self.EOS.On_Commit;
+   end On_Commit;
+
    ------------
    -- Parent --
    ------------
@@ -156,7 +173,7 @@ package body Incr.Nodes.Ultra_Roots is
    ---------------
 
    overriding procedure Set_Child
-     (Self  : in out Ultra_Root;
+     (Self  : aliased in out Ultra_Root;
       Index : Positive;
       Value : Node_Access)
    is
@@ -169,6 +186,10 @@ package body Incr.Nodes.Ultra_Roots is
       end if;
 
       Versioned_Nodes.Set (Self.Root, Value, Now, Ignore);
+
+      if Value /= null then
+         Value.Set_Parent (Self'Unchecked_Access);
+      end if;
    end Set_Child;
 
    overriding function Span
@@ -199,13 +220,8 @@ package body Incr.Nodes.Ultra_Roots is
       ----------------
 
       procedure Initialize (Self  : out Ultra_Root'Class) is
-         Root : constant Incr.Nodes.Joints.Joint_Access :=
-           new Incr.Nodes.Joints.Joint (Self.Document, 0);
+         Root : constant Incr.Nodes.Joints.Joint_Access := null;
       begin
-         Incr.Nodes.Joints.Constructors.Initialize_Ancient
-           (Self     => Root.all,
-            Parent => Self'Unchecked_Access);
-
          Self.BOS := new Nodes.Tokens.Token (Self.Document);
          Nodes.Tokens.Constructors.Initialize_Ancient
            (Self   => Self.BOS.all,

@@ -95,7 +95,7 @@ package body Incr.Lexers.Incremental is
                  Node.Child (J, Reference);
                Token  : Nodes.Tokens.Token_Access;
             begin
-               if Now /= Before then
+               if Now /= Before and Before /= null then
                   Token := Before.First_Token (Reference);
                   Mark_From (Token, Reference);
                   Token := Before.Last_Token (Reference)
@@ -157,7 +157,7 @@ package body Incr.Lexers.Incremental is
    is
       use type Nodes.Tokens.Token_Access;
 
-      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+      Ref : constant Version_Trees.Version := Self.Reference;
    begin
       --  Reset internal state of batch lexer by setting new source
       Self.Batch.Set_Source (Self'Unchecked_Access);
@@ -165,7 +165,7 @@ package body Incr.Lexers.Incremental is
       if Token = Token.Document.Start_Of_Stream then
          Self.State := Lexers.Batch_Lexers.INITIAL;
       else
-         Self.State := Token.Previous_Token (Now).State (Now);
+         Self.State := Token.Previous_Token (Ref).State (Ref);
       end if;
 
       Self.Batch.Set_Start_Condition (Self.State);
@@ -173,7 +173,7 @@ package body Incr.Lexers.Incremental is
 
       Self.Token := Token;
       Self.Count := 0;
-      Self.Text := Self.Token.Text (Self.Now);
+      Self.Text := Self.Token.Text (Self.Previous);
       Self.Cursor.First (Self.Text);
 
       return Next_New_Token (Self);
@@ -190,15 +190,15 @@ package body Incr.Lexers.Incremental is
       use type Nodes.Tokens.Token_Access;
    begin
       while not Self.Cursor.Has_Element loop
-         Self.Count := Self.Count + Self.Token.Text (Self.Now).Length;
-         Self.State := Self.Token.State (Self.Now);
-         Self.Token := Self.Token.Next_Token (Self.Now);
+         Self.Count := Self.Count + Self.Token.Text (Self.Previous).Length;
+         Self.State := Self.Token.State (Self.Previous);
+         Self.Token := Self.Token.Next_Token (Self.Previous);
 
          if Self.Token = null then
             return Batch_Lexers.End_Of_Input;
          end if;
 
-         Self.Text := Self.Token.Text (Self.Now);
+         Self.Text := Self.Token.Text (Self.Previous);
          Self.Cursor.First (Self.Text);
       end loop;
 
@@ -316,7 +316,6 @@ package body Incr.Lexers.Incremental is
       Now : constant Version_Trees.Version := Document.History.Changing;
    begin
       Self.Document  := Document;
-      Self.Now      := Now;
       Self.Reference := Reference;
       Self.Previous  := Document.History.Parent (Now);
 

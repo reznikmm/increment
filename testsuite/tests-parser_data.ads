@@ -63,9 +63,12 @@ package Tests.Parser_Data is
    type Node_Factory (Document : Incr.Documents.Document_Access) is
      new P.Node_Factory with null record;
 
-   overriding function Create_Node
+   overriding procedure Create_Node
      (Self     : aliased in out Node_Factory;
-      Prod     : P.Production_Index;
-      Children : Incr.Nodes.Node_Array) return Incr.Nodes.Node_Access;
+      Prod     : Incr.Parsers.Incremental.
+        Parser_Data_Providers.Production_Index;
+      Children : Incr.Nodes.Node_Array;
+      Node     : out Incr.Nodes.Node_Access;
+      Kind     : out Incr.Nodes.Node_Kind);
 
 end Tests.Parser_Data;

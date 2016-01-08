@@ -106,10 +106,12 @@ package Incr.Parsers.Incremental is
       type Node_Factory is limited interface;
       type Node_Factory_Access is access all Node_Factory'Class;
 
-      not overriding function Create_Node
+      not overriding procedure Create_Node
         (Self     : aliased in out Node_Factory;
          Prod     : Production_Index;
-         Children : Nodes.Node_Array) return Nodes.Node_Access is abstract;
+         Children : Nodes.Node_Array;
+         Node     : out Nodes.Node_Access;
+         Kind     : out Nodes.Node_Kind) is abstract;
 
    end Parser_Data_Providers;
 

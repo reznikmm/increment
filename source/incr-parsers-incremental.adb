@@ -42,6 +42,8 @@
 --  $Revision: 449 $ $Date: 2015-12-31 14:45:07 +0200 (Чт, 31 дек 2015) $
 ------------------------------------------------------------------------------
 
+with League.Strings;
+
 with Incr.Nodes.Tokens;
 
 package body Incr.Parsers.Incremental is
@@ -62,6 +64,7 @@ package body Incr.Parsers.Incremental is
 
       use Parser_Data_Providers;
       use type Nodes.Tokens.Token_Access;
+      use type Nodes.Node_Kind;
 
       Stack_Length : constant := 256;
 
@@ -102,6 +105,8 @@ package body Incr.Parsers.Incremental is
       Stack  : Parser_Stack;
       State  : Parser_State := 1;
 
+      Parent      : constant Version_Trees.Version :=
+        Document.History.Parent (Document.History.Changing);
       Next_Action : constant Action_Table_Access := Provider.Actions;
       Next_State  : constant State_Table_Access := Provider.States;
       Counts      : constant Parts_Count_Table_Access := Provider.Part_Counts;
@@ -146,20 +151,22 @@ package body Incr.Parsers.Incremental is
       procedure On_Reduce (Parts : Production_Index) is
          Count : constant Natural := Counts (Parts);
          subtype First_Nodes is Nodes.Node_Array (1 .. Count);
-         Node : Nodes.Node_Access;
+
+         Kind : Nodes.Node_Kind;
       begin
          Stack.Top := Stack.Top - Count + 1;
 
-         Node := Factory.Create_Node
+         Factory.Create_Node
            (Parts,
-            First_Nodes (Stack.Node (Stack.Top .. Stack.Top + Count - 1)));
-
-         Stack.Node (Stack.Top) := Node;
+            First_Nodes (Stack.Node (Stack.Top .. Stack.Top + Count - 1)),
+            Stack.Node (Stack.Top),
+            Kind);
 
          if Count = 0 then
-            State := Next_State (State, Node.Kind);
+            Stack.State (Stack.Top) := State;
+            State := Next_State (State, Kind);
          else
-            State := Next_State (Stack.State (Stack.Top), Node.Kind);
+            State := Next_State (Stack.State (Stack.Top), Kind);
          end if;
       end On_Reduce;
 
@@ -238,6 +245,11 @@ package body Incr.Parsers.Incremental is
         Document.Start_Of_Stream.Next_Subtree (Reference);
       Next   : Action;
    begin
+      Document.Start_Of_Stream.Set_Text
+        (League.Strings.Empty_Universal_String);
+      Document.End_Of_Stream.Set_Text
+        (League.Strings.Empty_Universal_String);
+
       Lexer.Prepare_Document (Document, Reference);
       Clear (Stack);
       Push (Stack, 1, Nodes.Node_Access (Document.Start_Of_Stream));
@@ -249,6 +261,7 @@ package body Incr.Parsers.Incremental is
               and then not EOF
             then
                Term := Lexer.First_New_Token (Nodes.Tokens.Token_Access (LA));
+               LA := Term;
                Lexing := True;
             else
                Term := Nodes.Tokens.Token_Access (LA);
@@ -258,7 +271,7 @@ package body Incr.Parsers.Incremental is
 
             case Next.Kind is
                when Finish =>
-                  if Term = Document.End_Of_Stream then
+                  if Term.Kind = 0 then  --  End_Of_Stream
                      declare
                         Node  : Nodes.Node_Access;
                      begin
@@ -296,7 +309,7 @@ package body Incr.Parsers.Incremental is
 
             end case;
 
-         elsif LA.Get_Flag (Nodes.Need_Analysis) then
+         elsif LA.Nested_Changes (Reference, Parent) then
             LA := Left_Breakdown (LA.all'Access);
          else
             --  perform_all_reductions_possible ???

@@ -11,7 +11,7 @@ package body Incr.Nodes.Joints is
       ----------------
 
       procedure Initialize
-        (Self     : out Joint'Class;
+        (Self     : aliased out Joint'Class;
          Kind     : Node_Kind;
          Children : Node_Array)
       is
@@ -28,6 +28,10 @@ package body Incr.Nodes.Joints is
             Versioned_Nodes.Initialize (Self.Kids (J), null);
             Versioned_Nodes.Set (Self.Kids (J), Children (J), Now, Diff);
             Self.Update_Local_Changes (Diff);
+
+            if Children (J) /= null then
+               Children (J).Set_Parent (Self'Unchecked_Access);
+            end if;
          end loop;
       end Initialize;
 
@@ -143,7 +147,7 @@ package body Incr.Nodes.Joints is
    ---------------
 
    overriding procedure Set_Child
-     (Self  : in out Joint;
+     (Self  : aliased in out Joint;
       Index : Positive;
       Value : Node_Access)
    is
@@ -153,6 +157,10 @@ package body Incr.Nodes.Joints is
    begin
       Versioned_Nodes.Set (Self.Kids (Index), Value, Now, Diff);
       Self.Update_Local_Changes (Diff);
+
+      if Value /= null then
+         Value.Set_Parent (Self'Unchecked_Access);
+      end if;
    end Set_Child;
 
    ----------

@@ -86,18 +86,27 @@ package body Tests.Parser_Data is
    -- Create_Node --
    -----------------
 
-   overriding function Create_Node
+   overriding procedure Create_Node
      (Self     : aliased in out Node_Factory;
-      Prod     : P.Production_Index;
-      Children : Incr.Nodes.Node_Array) return Incr.Nodes.Node_Access
+      Prod     : Incr.Parsers.Incremental.
+        Parser_Data_Providers.Production_Index;
+      Children : Incr.Nodes.Node_Array;
+      Node     : out Incr.Nodes.Node_Access;
+      Kind     : out Incr.Nodes.Node_Kind)
    is
-      Kind   : constant Incr.Nodes.Node_Kind := NT (Prod);
-      Result : constant Incr.Nodes.Joints.Joint_Access :=
-        new Incr.Nodes.Joints.Joint (Self.Document, Children'Length);
+      Result : Incr.Nodes.Joints.Joint_Access;
    begin
+      Kind := NT (Prod);
+
+      if Children'Length = 0 then
+         Node := null;
+         return;
+      end if;
+
+      Result := new Incr.Nodes.Joints.Joint (Self.Document, Children'Length);
       Incr.Nodes.Joints.Constructors.Initialize (Result.all, Kind, Children);
 
-      return Incr.Nodes.Node_Access (Result);
+      Node := Incr.Nodes.Node_Access (Result);
    end Create_Node;
 
    ------------
