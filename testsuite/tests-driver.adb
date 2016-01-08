@@ -171,7 +171,7 @@ procedure Tests.Driver is
        new Tests.Parser_Data.Node_Factory (Document);
 
    Hash : Ada.Containers.Hash_Type := 0;
-   V2   : Incr.Version_Trees.Version;
+   Ref  : Incr.Version_Trees.Version;
 begin
    Incr.Documents.Constructors.Initialize (Document.all);
    Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
@@ -180,8 +180,6 @@ begin
      (League.Strings.To_Universal_String ("a1"));
 
    Document.Commit;
-
-   V2 := History.Changing;
 
    Dump (Hash, Document.Ultra_Root, "");
    pragma Assert (Hash = 2962486295);
@@ -196,12 +194,31 @@ begin
    Dump (Hash, Document.Ultra_Root, "");
    pragma Assert (Hash = 2317793671);
 
+   Ref := History.Changing;
    Document.Commit;
 
-   Document.Start_Of_Stream.Next_Token (V2).Set_Text
+   Document.End_Of_Stream.Set_Text
+     (League.Strings.To_Universal_String ("2"));
+
+   Document.Commit;
+
+   Incr_Parser.Run
+     (Lexer     => Incr_Lexer,
+      Provider  => Provider,
+      Factory   => Node_Factory,
+      Document  => Document,
+      Reference => Ref);
+
+   Dump (Hash, Document.Ultra_Root, "");
+   pragma Assert (Hash = 2140449180);
+
+   Ref := History.Changing;
+   Document.Commit;
+
+   Document.Start_Of_Stream.Next_Token (Ref).Set_Text
      (League.Strings.Empty_Universal_String);
 
-   Document.End_Of_Stream.Previous_Token (V2).Set_Text
+   Document.End_Of_Stream.Previous_Token (Ref).Set_Text
      (League.Strings.Empty_Universal_String);
 
    Document.Commit;
@@ -211,9 +228,9 @@ begin
       Provider  => Provider,
       Factory   => Node_Factory,
       Document  => Document,
-      Reference => V2);
+      Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 978949518);
+   pragma Assert (Hash = 801605027);
 
 end Tests.Driver;

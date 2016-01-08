@@ -72,8 +72,8 @@ package body Incr.Nodes.Tokens is
          Nodes.Constructors.Initialize (Self);
          Versioned_Strings.Initialize
            (Self.Text, League.Strings.Empty_Universal_String);
-         Versioned_Naturals.Initialize (Self.Back, 0);
-         Versioned_Naturals.Initialize (Self.Ahead, 0);
+         Versioned_Naturals.Initialize (Self.Back, 1);
+         Versioned_Naturals.Initialize (Self.Ahead, 1);
          Versioned_Naturals.Initialize (Self.States, 0);
 
          Versioned_Booleans.Set (Self.Exist, True, Now, Diff);  --  UNDELETE??
@@ -100,8 +100,8 @@ package body Incr.Nodes.Tokens is
          Nodes.Constructors.Initialize_Ancient (Self, Parent);
          Versioned_Strings.Initialize
            (Self.Text, League.Strings.Empty_Universal_String);
-         Versioned_Naturals.Initialize (Self.Back, 0);
-         Versioned_Naturals.Initialize (Self.Ahead, 0);
+         Versioned_Naturals.Initialize (Self.Back, 1);
+         Versioned_Naturals.Initialize (Self.Ahead, 1);
          Versioned_Naturals.Initialize (Self.States, 0);
       end Initialize_Ancient;
 

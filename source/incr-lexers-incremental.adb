@@ -171,6 +171,8 @@ package body Incr.Lexers.Incremental is
       Self.Batch.Set_Start_Condition (Self.State);
       --  Self.New_State defined in Next_New_Token
 
+      Self.Prev_Token := null;
+      Self.Last_Reused := null;
       Self.Token := Token;
       Self.Count := 0;
       Self.Text := Self.Token.Text (Self.Previous);
@@ -188,16 +190,22 @@ package body Incr.Lexers.Incremental is
       return Wide_Wide_Character
    is
       use type Nodes.Tokens.Token_Access;
+      Token : Nodes.Tokens.Token_Access;
    begin
       while not Self.Cursor.Has_Element loop
          Self.Count := Self.Count + Self.Token.Text (Self.Previous).Length;
          Self.State := Self.Token.State (Self.Previous);
-         Self.Token := Self.Token.Next_Token (Self.Previous);
+         Token := Self.Token.Next_Token (Self.Previous);
 
-         if Self.Token = null then
+         if Token = null then
             return Batch_Lexers.End_Of_Input;
          end if;
 
+         if Self.Token /= Self.Last_Reused then
+            Self.Prev_Token := Self.Token;
+         end if;
+
+         Self.Token := Token;
          Self.Text := Self.Token.Text (Self.Previous);
          Self.Cursor.First (Self.Text);
       end loop;
@@ -283,6 +291,26 @@ package body Incr.Lexers.Incremental is
      (Self : in out Incremental_Lexer)
       return Nodes.Tokens.Token_Access
    is
+      function Could_Be_Reused
+        (Token : Nodes.Tokens.Token_Access;
+         Rule  : Batch_Lexers.Rule_Index) return Boolean;
+
+      ---------------------
+      -- Could_Be_Reused --
+      ---------------------
+
+      function Could_Be_Reused
+        (Token : Nodes.Tokens.Token_Access;
+         Rule  : Batch_Lexers.Rule_Index) return Boolean
+      is
+         use type Nodes.Token_Kind;
+         use type Nodes.Tokens.Token_Access;
+      begin
+         return Token /= null
+           and then Token.Kind = Nodes.Token_Kind (Rule)
+           and then Token /= Self.Last_Reused;
+      end Could_Be_Reused;
+
       Value  : League.Strings.Universal_String;
       Rule   : Batch_Lexers.Rule_Index;
       Result : Nodes.Tokens.Token_Access;
@@ -292,14 +320,28 @@ package body Incr.Lexers.Incremental is
       Self.Count := Self.Count - Value.Length;
       Self.New_State := Self.Batch.Get_Start_Condition;
 
-      Result := new Nodes.Tokens.Token (Self.Document);
+      if Could_Be_Reused (Self.Prev_Token, Rule) then
+         Result := Self.Prev_Token;
+         Result.Set_Text (Value);
+--           Result.Set_State (Self.New_State);
+--           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
+         Self.Prev_Token := null;
+      elsif Could_Be_Reused (Self.Token, Rule) then
+         Self.Last_Reused := Self.Token;
+         Result := Self.Token;
+         Result.Set_Text (Value);
+--           Result.Set_State (Self.New_State);
+--           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
+      else
+         Result := new Nodes.Tokens.Token (Self.Document);
 
-      Nodes.Tokens.Constructors.Initialize
-        (Result.all,
-         Nodes.Token_Kind (Rule),
-         Value,
-         Self.New_State,
-         Self.Batch.Get_Token_Lookahead);
+         Nodes.Tokens.Constructors.Initialize
+           (Result.all,
+            Nodes.Token_Kind (Rule),
+            Value,
+            Self.New_State,
+            Self.Batch.Get_Token_Lookahead);
+      end if;
 
       return Result;
    end Next_New_Token;
