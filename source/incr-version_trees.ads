@@ -121,13 +121,14 @@ package Incr.Version_Trees is
       --  * and 0 if Value has been changed already or match old value
 
    private
-      type Element_Array is array (Positive range <>) of Element;
-      type Version_Array is array (Positive range <>) of Version;
+      type Circle_Index is mod 8;
+      type Element_Array is array (Circle_Index) of Element;
+      type Version_Array is array (Circle_Index) of Version;
 
       type Container is record
-         Index    : Positive := 1;
-         Elements : Element_Array (1 .. 10);
-         Versions : Version_Array (1 .. 10);
+         Elements : Element_Array;
+         Versions : Version_Array;
+         Index    : Circle_Index := 0;
       end record;
 
    end Versioned_Values;
@@ -135,9 +136,14 @@ package Incr.Version_Trees is
 private
 
    --  This is prototype implementation. It doesn't support branching
-   --  and keeps history as linear sequence of versions.
+   --  and keeps history as linear sequence of versions. Only a few versions
+   --  are kept and any older versions are dropped.
 
-   type Version is new Natural;
+   type Version is mod 256;
+   function "<" (Left, Right : Version) return Boolean;
+   function ">=" (Left, Right : Version) return Boolean is
+     (not (Left < Right));
+   function ">" (Left, Right : Version) return Boolean is (Right < Left);
 
    type Version_Tree is tagged limited record
       Changing : Version := 1;

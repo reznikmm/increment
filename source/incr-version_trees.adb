@@ -54,38 +54,15 @@ package body Incr.Version_Trees is
       -- Get --
       ---------
 
-      function Get
-        (Self : Container;
-         Time : Version)
-         return Element
-      is
-         Low  : Positive := Self.Versions'First;
-         High : Positive := Self.Index;
-         Mid  : Positive;
+      function Get (Self : Container; Time : Version) return Element is
       begin
-         if Time >= Self.Versions (Self.Index) then
-            return Self.Elements (Self.Index);
-         end if;
-
-         loop
-            Mid := (Low + High) / 2;
-
-            if Time < Self.Versions (Mid) then
-               if Low = Mid then
-                  return Self.Elements (Mid);
-               end if;
-
-               High := Mid - 1;
-            elsif Time > Self.Versions (Mid) then
-               if High = Mid then
-                  return Self.Elements (Mid - 1);
-               end if;
-
-               Low := Mid + 1;
-            else
-               return Self.Elements (Mid);
+         for J in Self.Versions'Range loop
+            if Time >= Self.Versions (Self.Index - J) then
+               return Self.Elements (Self.Index - J);
             end if;
          end loop;
+
+         raise Constraint_Error with "version iss too old";
       end Get;
 
       ----------------
@@ -97,9 +74,9 @@ package body Incr.Version_Trees is
          Initial_Value : Element)
       is
       begin
-         Self.Versions (1) := 0;
-         Self.Elements (1) := Initial_Value;
-         Self.Index := 1;
+         Self.Versions := (others => 0);
+         Self.Elements := (others => Initial_Value);
+         Self.Index := 0;
       end Initialize;
 
       ---------
@@ -112,13 +89,14 @@ package body Incr.Version_Trees is
          Time    : Version;
          Changes : out Integer)
       is
-         Prev : constant Version := Time - 1;  -- Tree.Parent (Time)
-         Old  : constant Element := Get (Self, Prev);
+         Prev   : constant Version := Time - 1;  -- Tree.Parent (Time)
+         Old    : constant Element := Get (Self, Prev);
+         Is_Old : constant Boolean := Value = Old;
       begin
-         if Time = Self.Versions (Self.Index) and Value = Old then
+         if Time = Self.Versions (Self.Index) and Is_Old then
             Self.Index := Self.Index - 1;
             Changes := -1;
-         elsif Time > Self.Versions (Self.Index) and Value /= Old then
+         elsif Time > Self.Versions (Self.Index) and not Is_Old then
             Self.Index := Self.Index + 1;
             Self.Versions (Self.Index) := Time;
             Changes := 1;
@@ -129,12 +107,23 @@ package body Incr.Version_Trees is
             Changes := 0;
          end if;
 
-         if Value /= Old then
+         if not Is_Old then
             Self.Elements (Self.Index) := Value;
          end if;
       end Set;
 
    end Versioned_Values;
+
+   function "<" (Left, Right : Version) return Boolean is
+      L : constant Natural := Natural (Left);
+      R : constant Natural := Natural (Right);
+   begin
+      if L < 128 xor R < 128 then
+         return Natural (L + 8) < Natural (R + 8);
+      else
+         return L < R;
+      end if;
+   end "<";
 
    --------------
    -- Changing --
