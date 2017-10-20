@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -52,7 +52,6 @@ package body Incr.Lexers.Batch_Lexers.Generic_Lexers is
      (Self   : access Batch_Lexer;
       Result : out Rule_Index)
    is
-      use type Matreshka.Internals.Unicode.Code_Unit_32;
       Input         : Wide_Wide_Character;
       Code_Unit     : Matreshka.Internals.Unicode.Code_Unit_32;
       Pos           : Buffer_Index := 1;
