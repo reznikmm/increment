@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -76,7 +76,7 @@ package body Incr.Documents is
      (Self : Document) return Nodes.Tokens.Token_Access
    is
       Result : constant Nodes.Node_Access :=
-        Self.Ultra_Root.Child (Index => 3, Time => Self.History.Prehistoric);
+        Self.Ultra_Root.Child (Index => 3, Time => Self.History.Changing);
    begin
       return Nodes.Tokens.Token_Access (Result);
    end End_Of_Stream;
@@ -89,7 +89,7 @@ package body Incr.Documents is
      (Self : Document) return Nodes.Tokens.Token_Access
    is
       Result : constant Nodes.Node_Access :=
-        Self.Ultra_Root.Child (Index => 1, Time => Self.History.Prehistoric);
+        Self.Ultra_Root.Child (Index => 1, Time => Self.History.Changing);
    begin
       return Nodes.Tokens.Token_Access (Result);
    end Start_Of_Stream;

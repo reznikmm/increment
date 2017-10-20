@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -57,7 +57,7 @@ package Incr.Documents is
    --  * Start_Of_Stream - empty token at the beginning of the document
    --  * End_Of_Stream   - empty token at the end of the document
    --  * Ultra_Root      - contains these two tokens and root of parsing tree
-   --  These three nodes are created in prehistoric time and exist forever.
+   --  These three nodes are created on initialization and exist forever.
    --
    --  Original grammar is augmented by new top rule:
    --     ultra_root ::= <start_of_stream> [original_root] <end_of_stream>

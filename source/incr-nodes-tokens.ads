@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -109,8 +109,7 @@ package Incr.Nodes.Tokens is
       procedure Initialize_Ancient
         (Self    : aliased in out Token'Class;
          Parent  : Node_Access);
-      --  Initialize Self as token existent since Prehistoric time with given
-      --  Parent.
+      --  Initialize Self as token existent in initial version of the document.
    end Constructors;
 
 private

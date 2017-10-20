@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -155,16 +155,6 @@ package body Incr.Version_Trees is
       return Self.Changing = Value;
    end Is_Changing;
 
-   --------------------
-   -- Is_Prehistoric --
-   --------------------
-
-   function Is_Prehistoric
-     (Self : Version_Tree; Value : Version) return Boolean is
-   begin
-      return Self.Prehistoric = Value;
-   end Is_Prehistoric;
-
    ------------
    -- Parent --
    ------------
@@ -174,16 +164,6 @@ package body Incr.Version_Trees is
    begin
       return Value - 1;
    end Parent;
-
-   -----------------
-   -- Prehistoric --
-   -----------------
-
-   function Prehistoric (Self : Version_Tree) return Version is
-      pragma Unreferenced (Self);
-   begin
-      return 0;
-   end Prehistoric;
 
    ------------------
    -- Start_Change --

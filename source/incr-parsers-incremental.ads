@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -56,7 +56,7 @@ package Incr.Parsers.Incremental is
    --
    --  The package uses three versions of the document:
    --
-   --  * Reference - version when last analysis completed (or Prehistoric)
+   --  * Reference - version when last analysis completed
    --  * Changing - current version under construction
    --  * Previous - last read-olny version of document to be analyzed
    --

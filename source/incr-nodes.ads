@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -247,8 +247,7 @@ private
       procedure Initialize_Ancient
         (Self    : aliased in out Node_With_Parent'Class;
          Parent  : Node_Access);
-      --  Initialize Self as node existent since Prehistoric time with given
-      --  Parent.
+      --  Initialize Self as node existent in initial version of the document.
    end Constructors;
 
 end Incr.Nodes;

@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -171,7 +171,7 @@ procedure Tests.Driver is
        new Tests.Parser_Data.Node_Factory (Document);
 
    Hash : Ada.Containers.Hash_Type := 0;
-   Ref  : Incr.Version_Trees.Version;
+   Ref  : Incr.Version_Trees.Version := History.Parent (History.Changing);
 begin
    Incr.Documents.Constructors.Initialize (Document.all);
    Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
@@ -189,7 +189,7 @@ begin
       Provider  => Provider,
       Factory   => Node_Factory,
       Document  => Document,
-      Reference => History.Prehistoric);
+      Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
    pragma Assert (Hash = 2317793671);

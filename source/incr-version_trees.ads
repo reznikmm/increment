@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -54,36 +54,24 @@ package Incr.Version_Trees is
    --  Version identificator
    type Version_Tree is tagged limited private;
    --  Version_Tree keeps history of a document as sequence (actually tree) of
-   --  Versions as they are created.
-   --  Version tree always contains at least two versions:
-   --  * prehistoric - initial version of a document
-   --  * changing    - version where current chages are performed.
+   --  Versions as they are created. One version (changing) is different, this
+   --  is a version where current chages are performed.
    --  Only read-write version of the document is its changing version.
 
    type Version_Tree_Access is access all Version_Tree'Class;
-
-   not overriding function Prehistoric (Self : Version_Tree) return Version;
-   --  Root represents 'begin of time' version of a document.
-
-   not overriding function Is_Prehistoric
-     (Self : Version_Tree; Value : Version) return Boolean;
-   --  Check if this is prehistoric/initial version of a document.
-   --  @param Value version under test
 
    not overriding function Changing (Self : Version_Tree) return Version;
    --  Version where current chages are performed
 
    not overriding function Is_Changing
-     (Self : Version_Tree; Value : Version) return Boolean
-       with Pre => not Self.Is_Prehistoric (Value);
+     (Self : Version_Tree; Value : Version) return Boolean;
    --  Check if given Value is changing version of a document.
    --  @param Value version under test
 
    not overriding function Parent
-     (Self : Version_Tree; Value : Version) return Version
-       with Pre => not Self.Is_Prehistoric (Value);
-   --  Provide origin of given Version. Prehistoric has no parent.
-   --  @param Value version under query, should not be Is_Prehistoric
+     (Self : Version_Tree; Value : Version) return Version;
+   --  Provide origin of given Version.
+   --  @param Value version under query
 
    not overriding procedure Start_Change
      (Self     : in out Version_Tree;
@@ -111,7 +99,7 @@ package Incr.Version_Trees is
       procedure Initialize
         (Self          : in out Container;
          Initial_Value : Element);
-      --  Initialize container and place Initial_Value to Prehistoric version.
+      --  Initialize container and place Initial_Value as current.
       --  @param Initial_Value value at the initial version of a document
 
       function Get
