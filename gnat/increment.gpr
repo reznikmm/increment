@@ -46,7 +46,8 @@ with "matreshka_league.gpr";
 project Increment is
 
    for Object_Dir use "../.objs";
-   for Source_Dirs use ("../source/base");
+   for Source_Dirs use
+     ("../source/base", "../source/generated", "../source/ada");
 
 --   for Main use ("tests-driver");
 

@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2015-2017, Maxim Reznik <max@gela.work>                      --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -48,7 +48,7 @@ project Increment_Tests is
    for Object_Dir use "../.objs";
    for Source_Dirs use ("../testsuite");
 
-   for Main use ("tests-driver");
+   for Main use ("tests-driver", "ada_lexer_test");
 
    package Compiler renames Increment.Compiler;
 
