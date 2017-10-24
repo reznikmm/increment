@@ -58,6 +58,118 @@ package body Incr.Ada_Lexers is
 
    Map : Maps.Map;
 
+   --  Our batch lexer return token codes in this order:
+   Convert : constant array (Token range 1 .. 107) of Token :=
+     (Arrow_Token,
+      Double_Dot_Token,
+      Double_Star_Token,
+      Assignment_Token,
+      Inequality_Token,
+      Greater_Or_Equal_Token,
+      Less_Or_Equal_Token,
+      Left_Label_Token,
+      Right_Label_Token,
+      Box_Token,
+      Ampersand_Token,
+      Apostrophe_Token,
+      Left_Parenthesis_Token,
+      Right_Parenthesis_Token,
+      Star_Token,
+      Plus_Token,
+      Comma_Token,
+      Hyphen_Token,
+      Dot_Token,
+      Slash_Token,
+      Colon_Token,
+      Semicolon_Token,
+      Less_Token,
+      Equal_Token,
+      Greater_Token,
+      Vertical_Line_Token,
+
+      Identifier_Token,
+      Numeric_Literal_Token,
+      Character_Literal_Token,
+      String_Literal_Token,
+      Comment_Token,
+      Space_Token,
+      New_Line_Token,
+      Error_Token,
+
+      Abort_Token,
+      Abs_Token,
+      Abstract_Token,
+      Accept_Token,
+      Access_Token,
+      Aliased_Token,
+      All_Token,
+      And_Token,
+      Array_Token,
+      At_Token,
+      Begin_Token,
+      Body_Token,
+      Case_Token,
+      Constant_Token,
+      Declare_Token,
+      Delay_Token,
+      Delta_Token,
+      Digits_Token,
+      Do_Token,
+      Else_Token,
+      Elsif_Token,
+      End_Token,
+      Entry_Token,
+      Exception_Token,
+      Exit_Token,
+      For_Token,
+      Function_Token,
+      Generic_Token,
+      Goto_Token,
+      If_Token,
+      In_Token,
+      Interface_Token,
+      Is_Token,
+      Limited_Token,
+      Loop_Token,
+      Mod_Token,
+      New_Token,
+      Not_Token,
+      Null_Token,
+      Of_Token,
+      Or_Token,
+      Others_Token,
+      Out_Token,
+      Overriding_Token,
+      Package_Token,
+      Pragma_Token,
+      Private_Token,
+      Procedure_Token,
+      Protected_Token,
+      Raise_Token,
+      Range_Token,
+      Record_Token,
+      Rem_Token,
+      Renames_Token,
+      Requeue_Token,
+      Return_Token,
+      Reverse_Token,
+      Select_Token,
+      Separate_Token,
+      Some_Token,
+      Subtype_Token,
+      Synchronized_Token,
+      Tagged_Token,
+      Task_Token,
+      Terminate_Token,
+      Then_Token,
+      Type_Token,
+      Until_Token,
+      Use_Token,
+      When_Token,
+      While_Token,
+      With_Token,
+      Xor_Token);
+
    overriding procedure Get_Token
      (Self   : access Batch_Lexer;
       Result : out Lexers.Batch_Lexers.Rule_Index)
@@ -80,7 +192,7 @@ package body Incr.Ada_Lexers is
          Result := String_Literal_Token;
       elsif Result > 36 then
          Result := Error_Token;
-      elsif Result = Identifier_Token then
+      elsif Result = 27 then
          declare
             Text   : constant League.Strings.Universal_String :=
               Self.Get_Text.To_Casefold;
@@ -92,8 +204,12 @@ package body Incr.Ada_Lexers is
                if Start = Apostrophe and Result /= Range_Token then
                   Result := Identifier_Token;
                end if;
+            else
+               Result := Identifier_Token;
             end if;
          end;
+      elsif Result > 0 then
+         Result := Convert (Result);
       end if;
 
       if Result = Apostrophe_Token then
