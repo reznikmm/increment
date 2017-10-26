@@ -67,6 +67,10 @@ procedure Tests.Driver is
       Node   : Incr.Nodes.Node_Access;
       Indent : Wide_Wide_String);
 
+   Provider : constant Incr.Parsers.Incremental.Parser_Data_Providers
+     .Parser_Data_Provider_Access :=
+       new Tests.Parser_Data.Provider;
+
    ----------
    -- Dump --
    ----------
@@ -85,11 +89,9 @@ procedure Tests.Driver is
       procedure Print is
       begin
          Put (" node_kind='");
-         Put
-           (Incr.Nodes.Node_Kind'Wide_Wide_Image (Node.Kind));
+         Put (Provider.Kind_Image (Node.Kind));
          Put ("' nested_changes='");
-         Put
-           (Boolean'Wide_Wide_Image (Node.Nested_Changes (Now, Now)));
+         Put (Boolean'Wide_Wide_Image (Node.Nested_Changes (Now, Now)));
       end Print;
 
       ---------
@@ -162,10 +164,6 @@ procedure Tests.Driver is
    Incr_Parser : constant Incr.Parsers.Incremental.Incremental_Parser_Access :=
      new Incr.Parsers.Incremental.Incremental_Parser;
 
-   Provider : constant Incr.Parsers.Incremental.Parser_Data_Providers
-     .Parser_Data_Provider_Access :=
-       new Tests.Parser_Data.Provider;
-
    Node_Factory : constant Incr.Parsers.Incremental.Parser_Data_Providers
      .Node_Factory_Access :=
        new Tests.Parser_Data.Node_Factory (Document);
@@ -182,7 +180,7 @@ begin
    Document.Commit;
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2962486295);
+   pragma Assert (Hash = 386900059);
 
    Incr_Parser.Run
      (Lexer     => Incr_Lexer,
@@ -192,7 +190,7 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2317793686);
+   pragma Assert (Hash = 1175601664);
 
    Ref := History.Changing;
    Document.Commit;
@@ -210,7 +208,7 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2140449210);
+   pragma Assert (Hash = 2431651402);
 
    Ref := History.Changing;
    Document.Commit;
@@ -231,6 +229,6 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 801605057);
+   pragma Assert (Hash = 2812188309);
 
 end Tests.Driver;

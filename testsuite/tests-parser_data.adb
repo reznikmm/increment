@@ -112,6 +112,32 @@ package body Tests.Parser_Data is
       Node := Incr.Nodes.Node_Access (Result);
    end Create_Node;
 
+   overriding function Kind_Image
+     (Self : Provider;
+      Kind : Incr.Nodes.Node_Kind) return Wide_Wide_String
+   is
+      pragma Unreferenced (Self);
+   begin
+      case Kind is
+         when 0 =>
+            return "EOF";
+         when 1 =>
+            return "Ident";
+         when 2 =>
+            return "New_Line";
+         when 3 =>
+            return "Number";
+         when 4 =>
+            return "list";
+         when 5 =>
+            return "tok";
+         when 6 =>
+            return "tok_list";
+         when others =>
+            return "unknown";
+      end case;
+   end Kind_Image;
+
    ------------
    -- States --
    ------------

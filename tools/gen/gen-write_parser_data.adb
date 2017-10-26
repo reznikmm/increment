@@ -62,6 +62,7 @@ is
    function SD_Init return Ada_Outputs.Node_Access;
    function CD_Init return Ada_Outputs.Node_Access;
    function NT_Init return Ada_Outputs.Node_Access;
+   function Name_Case return Ada_Outputs.Node_Access;
    function To_Kind (Index : Gela.Grammars.Non_Terminal_Index) return Natural;
 
    F : aliased Ada_Outputs.Factory;
@@ -171,6 +172,42 @@ is
 
       return F.New_Parentheses (List);
    end CD_Init;
+
+   ---------------
+   -- Name_Case --
+   ---------------
+
+   function Name_Case return Ada_Outputs.Node_Access is
+      List : Ada_Outputs.Node_Access := F.New_Case_Path
+        (Choice => F.New_Literal (0),
+         List   => F.New_Return (F.New_String_Literal (+"EOF")));
+   begin
+      for Term in 1 .. Plain.Last_Terminal loop
+         List := F.New_List
+           (List,
+            F.New_Case_Path
+              (Choice => F.New_Literal (Natural (Term)),
+               List   => F.New_Return
+                 (F.New_String_Literal (Plain.Terminal (Term).Image))));
+      end loop;
+
+      for NT in 1 .. Plain.Last_Non_Terminal loop
+         List := F.New_List
+           (List,
+            F.New_Case_Path
+              (Choice => F.New_Literal (To_Kind (NT)),
+               List   => F.New_Return
+                 (F.New_String_Literal (Plain.Non_Terminal (NT).Name))));
+      end loop;
+
+      List := F.New_List
+        (List,
+         F.New_Case_Path
+           (Choice => F.New_Name (+"others"),
+            List   => F.New_Return (F.New_String_Literal (+"unknown"))));
+
+      return List;
+   end Name_Case;
 
    -------------
    -- NT_Init --
@@ -322,6 +359,24 @@ is
         Declarations => Self_Unreferenced,
         Statements => F.New_Return (F.New_Name (+"Action_Data'Access")));
 
+   Kind_Image : constant Ada_Outputs.Node_Access :=
+     F.New_Subprogram_Body
+       (F.New_Subprogram_Specification
+          (Is_Overriding => True,
+           Name          => F.New_Name (+"Kind_Image"),
+           Parameters    => F.New_List
+             (Self,
+              F.New_Parameter
+                (Name            => F.New_Name (+"Kind"),
+                 Type_Definition =>
+                   F.New_Selected_Name (+"Incr.Nodes.Node_Kind"))),
+           Result        => F.New_Name
+                               (+"Wide_Wide_String")),
+        Declarations => Self_Unreferenced,
+        Statements => F.New_Case
+          (Expression => F.New_Name (+"Kind"),
+           List       => Name_Case));
+
    Part_Counts : constant Ada_Outputs.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
@@ -422,7 +477,7 @@ is
      F.New_List
        ((F.New_Pragma (F.New_Name (+"Page")),
         Action_Data, State_Data, Count_Data, NT,
-        Actions, Part_Counts, States, Create_Node));
+        Actions, Kind_Image, Part_Counts, States, Create_Node));
 
    List : constant Ada_Outputs.Node_Access := F.New_List (Rename_List, Tables);
 

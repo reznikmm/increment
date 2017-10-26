@@ -103,6 +103,10 @@ package Incr.Parsers.Incremental is
         (Self : Parser_Data_Provider) return Parts_Count_Table_Access is
            abstract;
 
+      not overriding function Kind_Image
+        (Self : Parser_Data_Provider;
+         Kind : Nodes.Node_Kind) return Wide_Wide_String is abstract;
+
       type Node_Factory is limited interface;
       type Node_Factory_Access is access all Node_Factory'Class;
 

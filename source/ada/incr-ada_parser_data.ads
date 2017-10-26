@@ -17,6 +17,10 @@ package Incr.Ada_Parser_Data is
    overriding function States
      (Self : Provider) return P.State_Table_Access;
 
+   overriding function Kind_Image
+     (Self : Provider;
+      Kind : Incr.Nodes.Node_Kind) return Wide_Wide_String;
+
    type Node_Factory (Document : Incr.Documents.Document_Access) is
      new P.Node_Factory with null record;
 
