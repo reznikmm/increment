@@ -1,0 +1,6 @@
+Token Ident;
+Token Number;
+Token New_Line;
+
+list ::= {tok};
+tok ::= Ident | Number | New_Line;

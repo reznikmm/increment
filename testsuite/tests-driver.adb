@@ -192,7 +192,7 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2317793671);
+   pragma Assert (Hash = 2317793686);
 
    Ref := History.Changing;
    Document.Commit;
@@ -210,7 +210,7 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2140449180);
+   pragma Assert (Hash = 2140449210);
 
    Ref := History.Changing;
    Document.Commit;
@@ -231,6 +231,6 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 801605027);
+   pragma Assert (Hash = 801605057);
 
 end Tests.Driver;

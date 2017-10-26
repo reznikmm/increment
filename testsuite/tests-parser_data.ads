@@ -71,4 +71,9 @@ package Tests.Parser_Data is
       Node     : out Incr.Nodes.Node_Access;
       Kind     : out Incr.Nodes.Node_Kind);
 
+private
+
+   type Node_Kind_Array is array (P.Production_Index range <>) of
+     Incr.Nodes.Node_Kind;
+
 end Tests.Parser_Data;

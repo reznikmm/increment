@@ -63,7 +63,6 @@ package body Incr.Parsers.Incremental is
       pragma Unreferenced (Self);
 
       use Parser_Data_Providers;
-      use type Nodes.Tokens.Token_Access;
       use type Nodes.Node_Kind;
 
       Stack_Length : constant := 256;
@@ -105,7 +104,7 @@ package body Incr.Parsers.Incremental is
       Stack  : Parser_Stack;
       State  : Parser_State := 1;
 
-      Parent      : constant Version_Trees.Version :=
+      Previous    : constant Version_Trees.Version :=
         Document.History.Parent (Document.History.Changing);
       Next_Action : constant Action_Table_Access := Provider.Actions;
       Next_State  : constant State_Table_Access := Provider.States;
@@ -164,10 +163,9 @@ package body Incr.Parsers.Incremental is
 
          if Count = 0 then
             Stack.State (Stack.Top) := State;
-            State := Next_State (State, Kind);
-         else
-            State := Next_State (Stack.State (Stack.Top), Kind);
          end if;
+
+         State := Next_State (Stack.State (Stack.Top), Kind);
       end On_Reduce;
 
       --------------
@@ -237,6 +235,7 @@ package body Incr.Parsers.Incremental is
          Do_Shift (Node);
       end Right_Breakdown;
 
+      Verify : Boolean := False;
       Lexing : Boolean := False;
       EOF    : Boolean := False;
       Term   : Nodes.Tokens.Token_Access;
@@ -252,7 +251,7 @@ package body Incr.Parsers.Incremental is
 
       Lexer.Prepare_Document (Document, Reference);
       Clear (Stack);
-      Push (Stack, 1, Nodes.Node_Access (Document.Start_Of_Stream));
+      Push (Stack, State, Nodes.Node_Access (Document.Start_Of_Stream));
 
       loop
          if LA.Is_Token then
@@ -288,6 +287,7 @@ package body Incr.Parsers.Incremental is
                   On_Reduce (Next.Prod);
 
                when Shift =>
+                  Verify := False;
                   On_Shift (State, Next.State, Term);
 
                   if not Lexing then
@@ -305,26 +305,35 @@ package body Incr.Parsers.Incremental is
                   end if;
 
                when Error =>
-                  raise Constraint_Error;
+                  if Verify then
+                     Verify := False;
+                     Right_Breakdown;
+                  else
+                     raise Constraint_Error;
+                  end if;
 
             end case;
 
-         elsif LA.Nested_Changes (Reference, Parent) then
+         elsif LA.Nested_Changes (Reference, Previous) then
             LA := Left_Breakdown (LA.all'Access);
          else
-            --  perform_all_reductions_possible ???
-            declare
-               New_State : constant Parser_State :=
-                 Next_State (State, LA.Kind);
-            begin
-               if New_State /= 0 then
-                  On_Shift (State, New_State, Node => LA);
-                  Right_Breakdown;
+            Next := Next_Action (State, LA.Kind);
+            case Next.Kind is
+               when Finish =>
+                  raise Program_Error;
+               when Reduce =>
+                  On_Reduce (Next.Prod);
+               when Shift =>
+                  Verify := True;
+                  On_Shift (State, Next.State, LA);
                   LA := LA.Next_Subtree (Reference);
-               else
-                  LA := Left_Breakdown (LA.all'Access);
-               end if;
-            end;
+               when Error =>
+                  if LA.Arity > 0 then
+                     LA := Left_Breakdown (LA.all'Access);
+                  else
+                     LA := LA.Next_Subtree (Reference);
+                  end if;
+            end case;
          end if;
       end loop;
    end Run;

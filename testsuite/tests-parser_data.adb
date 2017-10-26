@@ -46,29 +46,32 @@ with Incr.Nodes.Joints;
 
 package body Tests.Parser_Data is
 
+   S : constant P.Action_Kinds := P.Shift;
+   R : constant P.Action_Kinds := P.Reduce;
+   E : constant P.Action := (Kind => P.Error);
+   F : constant P.Action := (Kind => P.Finish);
+
    Action_Data : aliased constant P.Action_Table :=
-     (1 => ((P.Reduce, 2), (P.Shift, 4),  (P.Shift, 3),  (P.Shift, 2)),
-      2 => (0 .. 3 => (P.Reduce, 4)),
-      3 => (0 .. 3 => (P.Reduce, 5)),
-      4 => (0 .. 3 => (P.Reduce, 3)),
-      5 => (0 .. 3 => (Kind => P.Finish)),
-      6 => (0 .. 3 => (P.Reduce, 7)),
-      7 => ((P.Reduce, 1), (P.Shift, 4),  (P.Shift, 3),  (P.Shift, 2)),
-      8 => (0 .. 3 => (P.Reduce, 6)));
+     (1 => ((R, 2), (S, 4), (S, 3), (S, 2), (S, 5), (S, 6), (S, 7)),
+      2 => ((R, 4), (R, 4), (R, 4), (R, 4), E, (R, 4), E),
+      3 => ((R, 5), (R, 5), (R, 5), (R, 5), E, (R, 5), E),
+      4 => ((R, 3), (R, 3), (R, 3), (R, 3), E, (R, 3), E),
+      5 => (F, E, E, E, E, E, E),
+      6 => ((R, 7), (R, 7), (R, 7), (R, 7), E, (R, 7), E),
+      7 => ((R, 1), (S, 4), (S, 3), (S, 2), E, (S, 8), E),
+      8 => ((R, 6), (R, 6), (R, 6), (R, 6), E, (R, 6), E));
 
+   State_Data  : aliased constant P.State_Table :=
+     (1 => (4 => 5, 5 => 6, 6 => 7), 2 => (4 => 0, 5 => 0, 6 => 0),
+      3 => (4 => 0, 5 => 0, 6 => 0), 4 => (4 => 0, 5 => 0, 6 => 0),
+      5 => (4 => 0, 5 => 0, 6 => 0), 6 => (4 => 0, 5 => 0, 6 => 0),
+      7 => (4 => 0, 5 => 8, 6 => 0), 8 => (4 => 0, 5 => 0, 6 => 0));
 
-   State_Data : aliased constant P.State_Table :=
-     (1 => (1 => 5, 2 => 6, 3 => 7),
-      2 .. 6 => (1 .. 3 => 0),
-      7 => (1 => 0, 2 => 8, 3 => 0),
-      8 => (1 .. 3 => 0));
-
-   Count_Data : aliased constant P.Parts_Count_Table :=
+   Count_Data  : aliased constant P.Parts_Count_Table :=
      (1 => 1, 2 => 0, 3 => 1, 4 => 1, 5 => 1, 6 => 2, 7 => 1);
 
-   NT : constant array (P.Production_Index range 1 .. 7) of
-     Incr.Nodes.Node_Kind :=
-       (1 .. 2 => 1, 3 .. 5 => 2, 6 .. 7 => 3);
+   NT          : constant Node_Kind_Array :=
+     (1 .. 2 => 4, 3 .. 5 => 5, 6 .. 7 => 6);
 
    -------------
    -- Actions --

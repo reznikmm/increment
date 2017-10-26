@@ -62,6 +62,7 @@ is
    function SD_Init return Ada_Outputs.Node_Access;
    function CD_Init return Ada_Outputs.Node_Access;
    function NT_Init return Ada_Outputs.Node_Access;
+   function To_Kind (Index : Gela.Grammars.Non_Terminal_Index) return Natural;
 
    F : aliased Ada_Outputs.Factory;
    LF : constant Wide_Wide_Character := Ada.Characters.Wide_Wide_Latin_1.LF;
@@ -86,6 +87,37 @@ is
                if Term in 0 and Finish (Table, State) then
                   Item := F.New_Name (+"F");
                elsif S not in 0 then
+                  Item := F.New_Parentheses
+                    (F.New_List
+                       ((F.New_Component_Association
+                          (Value => F.New_Name (+"S")),
+                        F.New_Component_Association
+                          (Value => F.New_Literal (Natural (S))))));
+               elsif not Is_Empty (R) then
+                  Item := F.New_Parentheses
+                    (F.New_List
+                       ((F.New_Component_Association
+                          (Value => F.New_Name (+"R")),
+                        F.New_Component_Association
+                          (Value => F.New_Literal
+                               (Natural (Production (R)))))));
+               else
+                  Item := F.New_Name (+"E");
+               end if;
+
+               List_2 := F.New_List
+                 (List_2, F.New_Component_Association (Value   => Item));
+            end;
+         end loop;
+
+         for NT in 1 .. Plain.Last_Non_Terminal loop
+            declare
+               Item : Ada_Outputs.Node_Access;
+               S    : constant Gela.Grammars.LR.State_Count :=
+                 Shift (Table, State, NT);
+               R    : constant Reduce_Iterator := Reduce (Table, State, NT);
+            begin
+               if S not in 0 then
                   Item := F.New_Parentheses
                     (F.New_List
                        ((F.New_Component_Association
@@ -154,8 +186,7 @@ is
               (Choices => F.New_List
                    (F.New_Literal (Natural (NT.First)),
                     F.New_Infix (+"..", F.New_Literal (Natural (NT.Last)))),
-               Value => F.New_Literal
-                           (Natural (NT.Index))));
+               Value => F.New_Literal (To_Kind (NT.Index))));
       end loop;
 
       return F.New_Parentheses (List);
@@ -179,7 +210,7 @@ is
                List_2 := F.New_List
                  (List_2,
                   F.New_Component_Association
-                    (Choices => F.New_Literal (Natural (NT)),
+                    (Choices => F.New_Literal (To_Kind (NT)),
                      Value   => F.New_Literal (Natural (S))));
             end;
          end loop;
@@ -194,6 +225,16 @@ is
 
       return F.New_Parentheses (List);
    end SD_Init;
+
+   -------------
+   -- To_Kind --
+   -------------
+
+   function To_Kind
+     (Index : Gela.Grammars.Non_Terminal_Index) return Natural is
+   begin
+      return Positive (Plain.Last_Terminal) + Positive (Index);
+   end To_Kind;
 
    Clause : constant Ada_Outputs.Node_Access := F.New_With
      (F.New_Selected_Name (+"Incr.Nodes.Joints"));
