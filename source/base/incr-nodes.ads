@@ -115,6 +115,9 @@ package Incr.Nodes is
       Value : Node_Access) is abstract;
    --  ??? should it be hidden
 
+   not overriding procedure Discard (Self  : in out Node) is abstract;
+   --  Discards any uncommitted modifications to this node.
+
    not overriding function Exists
      (Self  : Node;
       Time  : Version_Trees.Version) return Boolean is abstract;
@@ -177,6 +180,8 @@ package Incr.Nodes is
      (Self : in out Node;
       Diff : Integer) is abstract;
 
+   not overriding procedure Discard_Parent (Self : in out Node) is abstract;
+
 private
 
    type Flag_Array is array (Transient_Flags) of Boolean with Pack;
@@ -229,6 +234,8 @@ private
 
    type Node_With_Parent is abstract new Node_With_Exist with record
       Parent : Versioned_Nodes.Container;
+      --  Parent is NOT a property of the node! Don't account it in calculation
+      --  of local/nested change flags.
    end record;
 
    overriding function Parent
@@ -238,6 +245,8 @@ private
    overriding procedure Set_Parent
      (Self  : in out Node_With_Parent;
       Value : Node_Access);
+
+   overriding procedure Discard_Parent (Self : in out Node_With_Parent);
 
    package Constructors is
       procedure Initialize

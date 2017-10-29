@@ -79,6 +79,15 @@ package body Incr.Nodes.Ultra_Roots is
       end case;
    end Child;
 
+   -------------
+   -- Discard --
+   -------------
+
+   overriding procedure Discard (Self  : in out Ultra_Root) is
+   begin
+      raise Program_Error with "Unimplemented";
+   end Discard;
+
    ------------
    -- Exists --
    ------------

@@ -65,6 +65,8 @@ private
       Kind : Span_Kinds;
       Time : Version_Trees.Version) return Natural;
 
+   overriding procedure Discard (Self  : in out Joint);
+
    overriding procedure On_Commit (Self : in out Joint);
 
 end Incr.Nodes.Joints;

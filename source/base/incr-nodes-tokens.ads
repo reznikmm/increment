@@ -151,4 +151,6 @@ private
       Kind : Span_Kinds;
       Time : Version_Trees.Version) return Natural;
 
+   overriding procedure Discard (Self  : in out Token);
+
 end Incr.Nodes.Tokens;

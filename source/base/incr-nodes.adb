@@ -90,6 +90,29 @@ package body Incr.Nodes is
       return Versioned_Booleans.Get (Self.Exist, Time);
    end Exists;
 
+   --------------------
+   -- Discard_Parent --
+   --------------------
+
+   overriding procedure Discard_Parent (Self : in out Node_With_Parent) is
+      Changed : Boolean;
+      Ignore  : Integer := 0;
+      Now     : constant Version_Trees.Version :=
+        Self.Document.History.Changing;
+   begin
+      Changed := Self.Local_Changes > 0 or Self.Nested_Changes > 0;
+
+      if Changed then
+         Self.Propagate_Nested_Changes (-1);
+      end if;
+
+      Versioned_Nodes.Discard (Self.Parent, Now, Ignore);
+
+      if Changed then
+         Self.Propagate_Nested_Changes (1);
+      end if;
+   end Discard_Parent;
+
    -----------------
    -- First_Token --
    -----------------

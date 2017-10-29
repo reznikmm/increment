@@ -73,6 +73,24 @@ package body Incr.Nodes.Joints is
       return Versioned_Nodes.Get (Self.Kids (Index), Time);
    end Child;
 
+   -------------
+   -- Discard --
+   -------------
+
+   overriding procedure Discard (Self  : in out Joint) is
+      Now  : constant Version_Trees.Version := Self.Document.History.Changing;
+      Diff : Integer := 0;
+   begin
+      Versioned_Booleans.Discard (Self.Exist, Now, Diff);
+
+      for J in Self.Kids'Range loop
+         Versioned_Nodes.Discard (Self.Kids (J), Now, Diff);
+         Self.Child (J, Now).Discard_Parent;
+      end loop;
+
+      Self.Update_Local_Changes (Diff);
+   end Discard;
+
    --------------
    -- Is_Token --
    --------------
@@ -154,8 +172,7 @@ package body Incr.Nodes.Joints is
       Value : Node_Access)
    is
       Diff : Integer := 0;
-      Now  : constant Version_Trees.Version :=
-        Self.Document.History.Changing;
+      Now  : constant Version_Trees.Version := Self.Document.History.Changing;
    begin
       Versioned_Nodes.Set (Self.Kids (Index), Value, Now, Diff);
       Self.Update_Local_Changes (Diff);

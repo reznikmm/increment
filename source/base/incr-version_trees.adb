@@ -50,6 +50,26 @@ package body Incr.Version_Trees is
 
    package body Versioned_Values is
 
+      -------------
+      -- Discard --
+      -------------
+
+      procedure Discard
+        (Self    : in out Container;
+         Time    : Version;
+         Changes : out Integer) is
+      begin
+         if Time = Self.Versions (Self.Index) then
+            Self.Index := Self.Index - 1;
+            Changes := -1;
+         elsif Time < Self.Versions (Self.Index) then
+            --  Reverting of earlyer version is not allowed
+            raise Constraint_Error;
+         else
+            Changes := 0;
+         end if;
+      end Discard;
+
       ---------
       -- Get --
       ---------

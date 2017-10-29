@@ -122,4 +122,8 @@ private
       Kind : Span_Kinds;
       Time : Version_Trees.Version) return Natural;
 
+   overriding procedure Discard (Self  : in out Ultra_Root);
+
+   overriding procedure Discard_Parent (Self : in out Ultra_Root) is null;
+
 end Incr.Nodes.Ultra_Roots;

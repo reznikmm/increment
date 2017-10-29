@@ -126,6 +126,22 @@ package body Incr.Nodes.Tokens is
       return null;
    end Child;
 
+   -------------
+   -- Discard --
+   -------------
+
+   overriding procedure Discard (Self  : in out Token) is
+      Now  : constant Version_Trees.Version := Self.Document.History.Changing;
+      Diff : Integer;
+   begin
+      Versioned_Booleans.Discard (Self.Exist, Now, Diff);
+      Versioned_Strings.Discard (Self.Text, Now, Diff);
+      Versioned_Naturals.Discard (Self.Back, Now, Diff);
+      Versioned_Naturals.Discard (Self.Ahead, Now, Diff);
+      Versioned_Naturals.Discard (Self.States, Now, Diff);
+      Self.Update_Local_Changes (Diff);
+   end Discard;
+
    --------------
    -- Is_Token --
    --------------

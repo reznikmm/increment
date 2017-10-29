@@ -120,6 +120,13 @@ package Incr.Version_Trees is
       --  * as -1 if Value is revereted to old value of the property
       --  * and 0 if Value has been changed already or match old value
 
+      procedure Discard
+        (Self    : in out Container;
+         Time    : Version;
+         Changes : out Integer);
+      --  Update container by reverting its value. Version should be
+      --  Is_Changing as in Set. See Set for description of Changes.
+
    private
       type Circle_Index is mod 8;
       type Element_Array is array (Circle_Index) of Element;
