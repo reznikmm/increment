@@ -175,6 +175,42 @@ package body Incr.Nodes is
       end if;
    end Last_Token;
 
+   -------------------
+   -- Local_Changes --
+   -------------------
+
+   overriding function Local_Changes
+     (Self : Node_With_Exist;
+      From : Version_Trees.Version;
+      To   : Version_Trees.Version) return Boolean
+   is
+      use type Version_Trees.Version;
+
+      Time : Version_Trees.Version := To;
+   begin
+      if Self.Document.History.Is_Changing (To) then
+         --  Self.LC doesn't contain Local_Changes for Is_Changing version yet
+         --  Take it from Self.Nested_Changes
+         if Self.Local_Changes > 0 then
+            return True;
+         elsif Time = From then
+            return False;
+         end if;
+
+         Time := Self.Document.History.Parent (Time);
+      end if;
+
+      while Time /= From loop
+         if Versioned_Booleans.Get (Self.LC, Time) then
+            return True;
+         end if;
+
+         Time := Self.Document.History.Parent (Time);
+      end loop;
+
+      return False;
+   end Local_Changes;
+
    ------------------
    -- Next_Subtree --
    ------------------
@@ -216,15 +252,18 @@ package body Incr.Nodes is
    ---------------
 
    overriding procedure On_Commit (Self : in out Node_With_Exist) is
+      Now   : constant Version_Trees.Version := Self.Document.History.Changing;
       This  : constant Node_Access := Self'Unchecked_Access;
       Child : Node_Access;
+      Diff  : Integer := 0;  --  Ignore this diff
    begin
+      Versioned_Booleans.Set (Self.LC, Self.Local_Changes > 0, Now, Diff);
       Self.Nested_Changes := 0;
       Self.Local_Changes := 0;
       Self.Flag := (others => False);
 
       for J in 1 .. This.Arity loop
-         Child := This.Child (J, Self.Document.History.Changing);
+         Child := This.Child (J, Now);
 
          if Child /= null then
             Child.On_Commit;

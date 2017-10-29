@@ -133,6 +133,34 @@ package body Incr.Nodes.Ultra_Roots is
       return 0;
    end Kind;
 
+   -------------------
+   -- Local_Changes --
+   -------------------
+
+   overriding function Local_Changes
+     (Self : Ultra_Root;
+      From : Version_Trees.Version;
+      To   : Version_Trees.Version) return Boolean
+   is
+      use type Version_Trees.Version;
+      Next : Version_Trees.Version := To;
+      Prev : Version_Trees.Version;
+   begin
+      loop
+         Prev := Self.Document.History.Parent (Next);
+
+         if Self.Child (2, Prev) /= Self.Child (2, Next) then
+            return True;
+         end if;
+
+         exit when From = Prev;
+
+         Next := Prev;
+      end loop;
+
+      return False;
+   end Local_Changes;
+
    --------------------
    -- Nested_Changes --
    --------------------

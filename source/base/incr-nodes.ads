@@ -105,6 +105,12 @@ package Incr.Nodes is
    --  Check if any node under subtree rooted by Self (exluding Self node)
    --  was changed in any way between given two versions.
 
+   not overriding function Local_Changes
+     (Self : Node;
+      From : Version_Trees.Version;
+      To   : Version_Trees.Version) return Boolean is abstract;
+   --  Check if node itself was changed in any way between given two versions.
+
    not overriding function Parent
      (Self  : Node;
       Time  : Version_Trees.Version) return Node_Access is abstract;
@@ -203,6 +209,7 @@ private
 
    type Node_With_Exist is abstract new Node with record
       Exist : Versioned_Booleans.Container;
+      LC    : Versioned_Booleans.Container;  -- Versioned local changes
       --  Transient fields valid during current version only
       Local_Changes  : Natural := 0;
       Nested_Changes : Natural := 0;
@@ -231,6 +238,11 @@ private
       Value : Boolean := True);
 
    overriding procedure On_Commit (Self : in out Node_With_Exist);
+
+   overriding function Local_Changes
+     (Self : Node_With_Exist;
+      From : Version_Trees.Version;
+      To   : Version_Trees.Version) return Boolean;
 
    type Node_With_Parent is abstract new Node_With_Exist with record
       Parent : Versioned_Nodes.Container;

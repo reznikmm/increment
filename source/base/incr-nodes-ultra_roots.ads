@@ -126,4 +126,9 @@ private
 
    overriding procedure Discard_Parent (Self : in out Ultra_Root) is null;
 
+   overriding function Local_Changes
+     (Self : Ultra_Root;
+      From : Version_Trees.Version;
+      To   : Version_Trees.Version) return Boolean;
+
 end Incr.Nodes.Ultra_Roots;

@@ -70,22 +70,16 @@ package body Incr.Lexers.Incremental is
       Reference : Version_Trees.Version)
    is
    begin
-      if Node.Is_Token then
+      if Node.Is_Token and then Node.Local_Changes (Reference, Previous) then
          declare
-            use type League.Strings.Universal_String;
-
             Token  : constant Nodes.Tokens.Token_Access :=
               Nodes.Tokens.Token_Access (Node);
-            Now    : constant League.Strings.Universal_String :=
-              Token.Text (Previous);
-            Before : constant League.Strings.Universal_String :=
-              Token.Text (Reference);
          begin
-            if Now /= Before then
-               Mark_From (Token, Reference);
-            end if;
+            --  Handle textual changes.
+            Mark_From (Token, Reference);
          end;
       else
+         --  Handle structural changes.
          for J in 1 .. Node.Arity loop
             declare
                use type Nodes.Node_Access;
@@ -105,6 +99,7 @@ package body Incr.Lexers.Incremental is
             end;
          end loop;
 
+         --  Recursively process any edits within this subtree.
          if Node.Nested_Changes (Reference, Previous) then
             for J in 1 .. Node.Arity loop
                declare
