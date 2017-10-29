@@ -65,7 +65,7 @@ package body Incr.Nodes.Tokens is
       is
          Now  : constant Version_Trees.Version :=
            Self.Document.History.Changing;
-         Diff : Integer;
+         Diff : Integer := 0;
       begin
          Self.Kind := Kind;
 
@@ -77,14 +77,8 @@ package body Incr.Nodes.Tokens is
          Versioned_Naturals.Initialize (Self.States, 0);
 
          Versioned_Booleans.Set (Self.Exist, True, Now, Diff);  --  UNDELETE??
-         Self.Update_Local_Changes (Diff);
-
          Versioned_Strings.Set (Self.Text, Value, Now, Diff);
-         Self.Update_Local_Changes (Diff);
-
          Versioned_Naturals.Set (Self.Ahead, Lookahead, Now, Diff);
-         Self.Update_Local_Changes (Diff);
-
          Versioned_Naturals.Set (Self.States, Natural (State), Now, Diff);
          Self.Update_Local_Changes (Diff);
       end Initialize;
@@ -97,6 +91,7 @@ package body Incr.Nodes.Tokens is
         (Self    : aliased in out Token'Class;
          Parent  : Node_Access) is
       begin
+         Self.Kind := 0;
          Nodes.Constructors.Initialize_Ancient (Self, Parent);
          Versioned_Strings.Initialize
            (Self.Text, League.Strings.Empty_Universal_String);
@@ -228,7 +223,7 @@ package body Incr.Nodes.Tokens is
       Value : League.Strings.Universal_String)
    is
       Now  : constant Version_Trees.Version := Self.Document.History.Changing;
-      Diff : Integer;
+      Diff : Integer := 0;
    begin
       Versioned_Strings.Set (Self.Text, Value, Now, Diff);
       Self.Update_Local_Changes (Diff);

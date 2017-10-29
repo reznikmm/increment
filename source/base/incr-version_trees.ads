@@ -113,7 +113,7 @@ package Incr.Version_Trees is
         (Self    : in out Container;
          Value   : Element;
          Time    : Version;
-         Changes : out Integer);
+         Changes : in out Integer);
       --  Update container by given value. Version should be Is_Changing in
       --  the corresponding Version_Tree. The call returns Changes counter:
       --  * as +1 if Value becomes new value of the property

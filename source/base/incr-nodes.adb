@@ -324,7 +324,7 @@ package body Incr.Nodes is
       Value : Node_Access)
    is
       Changed : Boolean;
-      Ignore  : Integer;
+      Ignore  : Integer := 0;
       Now     : constant Version_Trees.Version :=
         Self.Document.History.Changing;
    begin

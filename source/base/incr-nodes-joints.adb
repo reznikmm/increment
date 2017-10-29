@@ -17,22 +17,24 @@ package body Incr.Nodes.Joints is
       is
          Now  : constant Version_Trees.Version :=
            Self.Document.History.Changing;
-         Diff : Integer;
+         Diff : Integer := 0;
       begin
          Self.Kind := Kind;
 
          Nodes.Constructors.Initialize (Self);
          Versioned_Booleans.Initialize (Self.NC, False);
+         Versioned_Booleans.Set (Self.Exist, True, Now, Diff);
 
          for J in Children'Range loop
             Versioned_Nodes.Initialize (Self.Kids (J), null);
             Versioned_Nodes.Set (Self.Kids (J), Children (J), Now, Diff);
-            Self.Update_Local_Changes (Diff);
 
             if Children (J) /= null then
                Children (J).Set_Parent (Self'Unchecked_Access);
             end if;
          end loop;
+
+         Self.Update_Local_Changes (Diff);
       end Initialize;
 
       ------------------------
@@ -131,7 +133,7 @@ package body Incr.Nodes.Joints is
    ---------------
 
    overriding procedure On_Commit (Self : in out Joint) is
-      Ignore : Integer;
+      Ignore : Integer := 0;
    begin
       Versioned_Booleans.Set
         (Self    => Self.NC,
@@ -151,7 +153,7 @@ package body Incr.Nodes.Joints is
       Index : Positive;
       Value : Node_Access)
    is
-      Diff : Integer;
+      Diff : Integer := 0;
       Now  : constant Version_Trees.Version :=
         Self.Document.History.Changing;
    begin

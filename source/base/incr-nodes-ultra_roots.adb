@@ -179,7 +179,7 @@ package body Incr.Nodes.Ultra_Roots is
    is
       Now : constant Version_Trees.Version := Self.Document.History.Changing;
 
-      Ignore : Integer;
+      Ignore : Integer := 0;
    begin
       if Index /= 2 then
          raise Constraint_Error;

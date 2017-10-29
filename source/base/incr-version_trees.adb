@@ -87,7 +87,7 @@ package body Incr.Version_Trees is
         (Self    : in out Container;
          Value   : Element;
          Time    : Version;
-         Changes : out Integer)
+         Changes : in out Integer)
       is
          Prev   : constant Version := Time - 1;  -- Tree.Parent (Time)
          Old    : constant Element := Get (Self, Prev);
@@ -95,16 +95,14 @@ package body Incr.Version_Trees is
       begin
          if Time = Self.Versions (Self.Index) and Is_Old then
             Self.Index := Self.Index - 1;
-            Changes := -1;
+            Changes := Changes - 1;
          elsif Time > Self.Versions (Self.Index) and not Is_Old then
             Self.Index := Self.Index + 1;
             Self.Versions (Self.Index) := Time;
-            Changes := 1;
+            Changes := Changes + 1;
          elsif Time < Self.Versions (Self.Index) then
             --  Update of earlyer version is not allowed
             raise Constraint_Error;
-         else
-            Changes := 0;
          end if;
 
          if not Is_Old then
