@@ -103,9 +103,8 @@ package body Incr.Parsers.Incremental is
 
       Stack  : Parser_Stack;
       State  : Parser_State := 1;
+      Now    : constant Version_Trees.Version := Document.History.Changing;
 
-      Previous    : constant Version_Trees.Version :=
-        Document.History.Parent (Document.History.Changing);
       Next_Action : constant Action_Table_Access := Provider.Actions;
       Next_State  : constant State_Table_Access := Provider.States;
       Counts      : constant Parts_Count_Table_Access := Provider.Part_Counts;
@@ -314,7 +313,7 @@ package body Incr.Parsers.Incremental is
 
             end case;
 
-         elsif LA.Nested_Changes (Reference, Previous) then
+         elsif LA.Nested_Changes (Reference, Now) then
             LA := Left_Breakdown (LA.all'Access);
          else
             Next := Next_Action (State, LA.Kind);

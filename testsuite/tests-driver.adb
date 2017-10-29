@@ -85,13 +85,14 @@ procedure Tests.Driver is
       procedure Put_Line (Text : Wide_Wide_String);
 
       Now : Incr.Version_Trees.Version;
+      Prev : Incr.Version_Trees.Version;
 
       procedure Print is
       begin
          Put (" node_kind='");
          Put (Provider.Kind_Image (Node.Kind));
          Put ("' nested_changes='");
-         Put (Boolean'Wide_Wide_Image (Node.Nested_Changes (Now, Now)));
+         Put (Boolean'Wide_Wide_Image (Node.Nested_Changes (Prev, Now)));
       end Print;
 
       ---------
@@ -123,6 +124,7 @@ procedure Tests.Driver is
       end if;
 
       Now := Node.Document.History.Changing;
+      Prev := Node.Document.History.Parent (Now);
 
       if Node.Is_Token then
          declare
@@ -208,7 +210,7 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2431651402);
+   pragma Assert (Hash = 2895785183);
 
    Ref := History.Changing;
    Document.Commit;
@@ -229,6 +231,6 @@ begin
       Reference => Ref);
 
    Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2812188309);
+   pragma Assert (Hash = 3276322090);
 
 end Tests.Driver;

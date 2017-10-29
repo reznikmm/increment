@@ -201,6 +201,10 @@ package body Incr.Nodes.Ultra_Roots is
       end if;
    end Set_Child;
 
+   ----------
+   -- Span --
+   ----------
+
    overriding function Span
      (Self : aliased in out Ultra_Root;
       Kind : Span_Kinds;

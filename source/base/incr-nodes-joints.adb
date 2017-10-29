@@ -133,12 +133,10 @@ package body Incr.Nodes.Joints is
          Time := Self.Document.History.Parent (Time);
       end if;
 
-      loop
+      while Time /= From loop
          if Versioned_Booleans.Get (Self.NC, Time) then
             return True;
          end if;
-
-         exit when Time = From;
 
          Time := Self.Document.History.Parent (Time);
       end loop;
