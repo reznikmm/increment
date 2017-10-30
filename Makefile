@@ -12,3 +12,7 @@ source/generated/incr-ada_lexers-tables.adb: source/ada/ada.uaflex
 	uaflex --types Types --scanner Incr.Ada_Lexers \
 	 --handler Handlers --tokens Nodes.Tokens ../ada/ada.uaflex; \
 	rm types.ads handlers.ads incr-ada_lexers-on_accept.adb
+
+check: all
+	.objs/tests-driver testsuite/test_01.xml
+	@echo Tests OK!

@@ -50,6 +50,7 @@ with Gela.Grammars_Convertors;
 with Gela.Grammars_Debug;
 
 with Gen.Write_Parser_Data;
+with Gen.Write_XML;
 
 procedure Gen.Driver is
    File : constant String := Ada.Command_Line.Argument (1);
@@ -61,9 +62,11 @@ procedure Gen.Driver is
    Table : constant Gela.Grammars.LR_Tables.Table_Access :=
      Gela.Grammars.LR.LALR.Build (AG, False);
 begin
-   Gen.Write_Parser_Data (Plain, Table.all);
-
-   if Ada.Command_Line.Argument_Count > 1 then
+   if Ada.Command_Line.Argument_Count = 1 then
+      Gen.Write_Parser_Data (Plain, Table.all);
+   elsif Ada.Command_Line.Argument_Count = 2 then
+      Gen.Write_XML (Ada.Command_Line.Argument (2), Plain, Table.all);
+   elsif Ada.Command_Line.Argument_Count > 2 then
       Gela.Grammars_Debug.Print_Conflicts (AG, Table.all);
    end if;
 end Gen.Driver;

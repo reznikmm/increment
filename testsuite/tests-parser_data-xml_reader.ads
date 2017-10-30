@@ -8,7 +8,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --                                                                          --
--- Copyright © 2015, Maxim Reznik <max@gela.work>                           --
+-- Copyright © 2017, Maxim Reznik <max@gela.work>                           --
 -- All rights reserved.                                                     --
 --                                                                          --
 -- Redistribution and use in source and binary forms, with or without       --
@@ -42,69 +42,54 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-with League.String_Vectors;
+with League.Strings;
 
-with Incr.Documents;
-with Incr.Nodes;
-with Incr.Parsers.Incremental;
+with XML.SAX.Attributes;
+with XML.SAX.Content_Handlers;
+with XML.Templates.Streams;
 
-package Tests.Parser_Data is
-   package P renames Incr.Parsers.Incremental.Parser_Data_Providers;
+with Tests.Commands;
 
-   type Provider (Document  : Incr.Documents.Document_Access)
-     is new P.Parser_Data_Provider and P.Node_Factory with private;
+package Tests.Parser_Data.XML_Reader is
+   type Reader (Data : access Provider) is limited
+     new XML.SAX.Content_Handlers.SAX_Content_Handler with private;
 
-   overriding function Actions
-     (Self : Provider) return P.Action_Table_Access;
-
-   overriding function States
-     (Self : Provider) return P.State_Table_Access;
-
-   overriding function Part_Counts
-     (Self : Provider) return P.Parts_Count_Table_Access;
-
-   overriding function Kind_Image
-     (Self : Provider;
-      Kind : Incr.Nodes.Node_Kind) return Wide_Wide_String;
-
-   overriding procedure Create_Node
-     (Self     : aliased in out Provider;
-      Prod     : Incr.Parsers.Incremental.
-        Parser_Data_Providers.Production_Index;
-      Children : Incr.Nodes.Node_Array;
-      Node     : out Incr.Nodes.Node_Access;
-      Kind     : out Incr.Nodes.Node_Kind);
-
-   type Node_Kind_Array is array (P.Production_Index range <>) of
-     Incr.Nodes.Node_Kind;
+   function Get_Commands
+     (Self : Reader) return Tests.Commands.Command_Vectors.Vector;
 
 private
-   package Constructors is
-      function Create
-        (Document  : Incr.Documents.Document_Access;
-         NT        : Node_Kind_Array;
-         Parts     : P.Parts_Count_Table;
-         Names     : League.String_Vectors.Universal_String_Vector;
-         Max_State : P.Parser_State;
-         Max_Term  : Incr.Nodes.Token_Kind) return Provider;
-   end Constructors;
-
-   type Node_Kind_Array_Access is access all Node_Kind_Array;
-
-   type Action_Table_Access is access P.Action_Table;
-   type State_Table_Access is access P.State_Table;
-   type Parts_Count_Table_Access is access P.Parts_Count_Table;
-
-   type Provider
-     (Document  : Incr.Documents.Document_Access)
-   is new P.Parser_Data_Provider and P.Node_Factory with record
-      Max_Term  : Incr.Nodes.Token_Kind;
-      Max_NT    : Incr.Nodes.Node_Kind;
-      Names     : League.String_Vectors.Universal_String_Vector;
-      Actions   : Action_Table_Access;
-      States    : State_Table_Access;
-      NT        : Node_Kind_Array_Access;
-      Parts     : Parts_Count_Table_Access;
+   type Reader (Data : access Provider) is limited
+   new XML.SAX.Content_Handlers.SAX_Content_Handler with record
+      Collect_Text : Boolean := False;
+      Collect_XML  : Boolean := False;
+      Index        : Positive;
+      Text         : League.Strings.Universal_String;
+      List         : League.String_Vectors.Universal_String_Vector;
+      Commands     : Tests.Commands.Command_Vectors.Vector;
+      Vector       : XML.Templates.Streams.XML_Stream_Element_Vectors.Vector;
    end record;
 
-end Tests.Parser_Data;
+   overriding procedure Characters
+    (Self    : in out Reader;
+     Text    : League.Strings.Universal_String;
+     Success : in out Boolean);
+
+   overriding procedure End_Element
+    (Self           : in out Reader;
+     Namespace_URI  : League.Strings.Universal_String;
+     Local_Name     : League.Strings.Universal_String;
+     Qualified_Name : League.Strings.Universal_String;
+     Success        : in out Boolean);
+
+   overriding function Error_String
+    (Self : Reader) return League.Strings.Universal_String;
+
+   overriding procedure Start_Element
+    (Self           : in out Reader;
+     Namespace_URI  : League.Strings.Universal_String;
+     Local_Name     : League.Strings.Universal_String;
+     Qualified_Name : League.Strings.Universal_String;
+     Attributes     : XML.SAX.Attributes.SAX_Attributes;
+     Success        : in out Boolean);
+
+end Tests.Parser_Data.XML_Reader;

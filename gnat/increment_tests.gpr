@@ -42,6 +42,7 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 with "increment";
+with "matreshka_xml";
 
 project Increment_Tests is
 

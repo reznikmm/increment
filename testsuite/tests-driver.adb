@@ -42,11 +42,18 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-with Ada.Containers;
-with Ada.Strings.Wide_Wide_Hash;
+with Ada.Command_Line;
 with Ada.Wide_Wide_Text_IO;
 
+with League.Application;
 with League.Strings;
+
+with XML.SAX.Attributes;
+with XML.SAX.Input_Sources.Streams.Files;
+with XML.SAX.Pretty_Writers;
+with XML.SAX.Simple_Readers;
+with XML.SAX.String_Output_Destinations;
+with XML.Templates.Streams;
 
 with Incr.Documents;
 with Incr.Lexers.Batch_Lexers;
@@ -55,107 +62,184 @@ with Incr.Nodes.Tokens;
 with Incr.Parsers.Incremental;
 with Incr.Version_Trees;
 
+with Tests.Commands;
 with Tests.Lexers;
-with Tests.Parser_Data;
+with Tests.Parser_Data.XML_Reader;
 
 procedure Tests.Driver is
 
-   use type Ada.Containers.Hash_Type;
+   function "+" (Text : Wide_Wide_String)
+     return League.Strings.Universal_String
+       renames League.Strings.To_Universal_String;
 
    procedure Dump
-     (Hash   : in out Ada.Containers.Hash_Type;
-      Node   : Incr.Nodes.Node_Access;
-      Indent : Wide_Wide_String);
+     (Node   : Incr.Nodes.Node_Access;
+      Vector : in out XML.Templates.Streams.XML_Stream_Element_Vectors.Vector);
 
-   Provider : constant Incr.Parsers.Incremental.Parser_Data_Providers
-     .Parser_Data_Provider_Access :=
-       new Tests.Parser_Data.Provider;
+   function To_String
+     (Vector : XML.Templates.Streams.XML_Stream_Element_Vectors.Vector)
+       return League.Strings.Universal_String;
 
-   ----------
-   -- Dump --
-   ----------
+   type Provider_Access is access all Tests.Parser_Data.Provider;
 
-   procedure Dump
-     (Hash   : in out Ada.Containers.Hash_Type;
-      Node   : Incr.Nodes.Node_Access;
-      Indent : Wide_Wide_String)
-   is
-      procedure Print;
-      procedure Put (Text : Wide_Wide_String);
-      procedure Put_Line (Text : Wide_Wide_String);
-
-      Now : Incr.Version_Trees.Version;
-      Prev : Incr.Version_Trees.Version;
-
-      procedure Print is
-      begin
-         Put (" node_kind='");
-         Put (Provider.Kind_Image (Node.Kind));
-         Put ("' nested_changes='");
-         Put (Boolean'Wide_Wide_Image (Node.Nested_Changes (Prev, Now)));
-      end Print;
-
-      ---------
-      -- Put --
-      ---------
-
-      procedure Put (Text : Wide_Wide_String) is
-      begin
-         Ada.Wide_Wide_Text_IO.Put (Text);
-         Hash := Hash + Ada.Strings.Wide_Wide_Hash (Text);
-      end Put;
-
-      --------------
-      -- Put_Line --
-      --------------
-
-      procedure Put_Line (Text : Wide_Wide_String) is
-      begin
-         Put (Text);
-         Ada.Wide_Wide_Text_IO.New_Line;
-      end Put_Line;
-
-   begin
-      Put (Indent);
-
-      if Node in null then
-         Put_Line ("<null/>");
-         return;
-      end if;
-
-      Now := Node.Document.History.Changing;
-      Prev := Node.Document.History.Parent (Now);
-
-      if Node.Is_Token then
-         declare
-            Token : constant Incr.Nodes.Tokens.Token_Access :=
-              Incr.Nodes.Tokens.Token_Access (Node);
-         begin
-            Put ("<token ");
-            Print;
-            Put ("'>");
-            Put (Token.Text (Now).To_Wide_Wide_String);
-            Put_Line ("</token>");
-         end;
-      else
-         Put ("<node ");
-         Print;
-         Put_Line ("'>");
-
-         for J in 1 .. Node.Arity loop
-            Dump (Hash, Node.Child (J, Now), Indent & "  ");
-         end loop;
-
-         Put (Indent);
-         Put_Line ("</node>");
-      end if;
-   end Dump;
+   Nil_Location : constant XML.Templates.Streams.Event_Location :=
+     (League.Strings.Empty_Universal_String, 0, 0);
+   Nil_Attributes : XML.SAX.Attributes.SAX_Attributes;
 
    History : constant Incr.Version_Trees.Version_Tree_Access :=
      new Incr.Version_Trees.Version_Tree;
 
    Document : constant Incr.Documents.Document_Access :=
      new Incr.Documents.Document (History);
+
+   Provider : constant Provider_Access :=
+       new Tests.Parser_Data.Provider (Document);
+
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump
+     (Node   : Incr.Nodes.Node_Access;
+      Vector : in out XML.Templates.Streams.XML_Stream_Element_Vectors.Vector)
+   is
+      use XML.Templates.Streams;
+
+      function Now return Incr.Version_Trees.Version is
+         (Node.Document.History.Changing);
+
+      function Prev return Incr.Version_Trees.Version is
+         (Node.Document.History.Parent (Now));
+
+      function Common_Attributes return XML.SAX.Attributes.SAX_Attributes;
+
+      function Common_Attributes return XML.SAX.Attributes.SAX_Attributes is
+         Result : XML.SAX.Attributes.SAX_Attributes;
+      begin
+         Result.Set_Value
+           (Qualified_Name => +"kind",
+            Value          => +Provider.Kind_Image (Node.Kind));
+
+         if Node.Nested_Changes (Prev, Now) then
+            Result.Set_Value
+              (Qualified_Name => +"nc",
+               Value          => +"y");
+         end if;
+
+         if Node.Local_Changes (Prev, Now) then
+            Result.Set_Value
+              (Qualified_Name => +"lc",
+               Value          => +"y");
+         end if;
+         return Result;
+      end Common_Attributes;
+
+   begin
+      if Node in null then
+         Vector.Append
+           ((Kind           => XML.Templates.Streams.Start_Element,
+             Namespace_URI  => +"",
+             Local_Name     => +"null",
+             Qualified_Name => +"null",
+             Attributes     => Nil_Attributes,
+             Location       => Nil_Location));
+         Vector.Append
+           ((Kind           => XML.Templates.Streams.End_Element,
+             Namespace_URI  => +"",
+             Local_Name     => +"null",
+             Qualified_Name => +"null",
+             Location       => Nil_Location));
+
+         return;
+      elsif Node.Is_Token then
+         declare
+            Token : constant Incr.Nodes.Tokens.Token_Access :=
+              Incr.Nodes.Tokens.Token_Access (Node);
+            Text : constant League.Strings.Universal_String :=
+              Token.Text (Now);
+         begin
+            Vector.Append
+              ((Kind           => XML.Templates.Streams.Start_Element,
+                Namespace_URI  => +"",
+                Local_Name     => +"token",
+                Qualified_Name => +"token",
+                Attributes     => Common_Attributes,
+                Location       => Nil_Location));
+            if not Text.Is_Empty then
+               Vector.Append
+                 ((Kind     => XML.Templates.Streams.Text,
+                   Text     => Text,
+                   Location => Nil_Location));
+            end if;
+            Vector.Append
+              ((Kind           => XML.Templates.Streams.End_Element,
+                Namespace_URI  => +"",
+                Local_Name     => +"token",
+                Qualified_Name => +"token",
+                Location       => Nil_Location));
+         end;
+
+      else
+         Vector.Append
+           ((Kind           => XML.Templates.Streams.Start_Element,
+             Namespace_URI  => +"",
+             Local_Name     => +"node",
+             Qualified_Name => +"node",
+             Attributes     => Common_Attributes,
+             Location       => Nil_Location));
+
+         for J in 1 .. Node.Arity loop
+            Dump (Node.Child (J, Now), Vector);
+         end loop;
+
+         Vector.Append
+           ((Kind           => XML.Templates.Streams.End_Element,
+             Namespace_URI  => +"",
+             Local_Name     => +"node",
+             Qualified_Name => +"node",
+             Location       => Nil_Location));
+      end if;
+   end Dump;
+
+   ---------------
+   -- To_String --
+   ---------------
+
+   function To_String
+     (Vector : XML.Templates.Streams.XML_Stream_Element_Vectors.Vector)
+      return League.Strings.Universal_String
+   is
+      use XML.Templates.Streams;
+      Output : aliased XML.SAX.String_Output_Destinations.
+        String_Output_Destination;
+      Writer : XML.SAX.Pretty_Writers.XML_Pretty_Writer;
+   begin
+      Writer.Set_Output_Destination (Output'Unchecked_Access);
+      Writer.Set_Offset (2);
+      Writer.Start_Document;
+      for V of Vector loop
+         case V.Kind is
+            when Start_Element =>
+               Writer.Start_Element
+                 (Namespace_URI  => V.Namespace_URI,
+                  Qualified_Name => V.Qualified_Name,
+                  Local_Name     => V.Local_Name,
+                  Attributes     => V.Attributes);
+            when End_Element =>
+               Writer.End_Element
+                 (Namespace_URI  => V.Namespace_URI,
+                  Qualified_Name => V.Qualified_Name,
+                  Local_Name     => V.Local_Name);
+            when Text =>
+               Writer.Characters (V.Text);
+            when others =>
+               null;
+         end case;
+      end loop;
+
+      Writer.End_Document;
+      return Output.Get_Text;
+   end To_String;
 
    Batch_Lexer : constant Incr.Lexers.Batch_Lexers.Batch_Lexer_Access :=
      new Tests.Lexers.Test_Lexers.Batch_Lexer;
@@ -166,71 +250,70 @@ procedure Tests.Driver is
    Incr_Parser : constant Incr.Parsers.Incremental.Incremental_Parser_Access :=
      new Incr.Parsers.Incremental.Incremental_Parser;
 
-   Node_Factory : constant Incr.Parsers.Incremental.Parser_Data_Providers
-     .Node_Factory_Access :=
-       new Tests.Parser_Data.Node_Factory (Document);
-
-   Hash : Ada.Containers.Hash_Type := 0;
    Ref  : Incr.Version_Trees.Version := History.Parent (History.Changing);
+
+   Input   : aliased XML.SAX.Input_Sources.Streams.Files.File_Input_Source;
+   Reader  : XML.SAX.Simple_Readers.Simple_Reader;
+   Handler : aliased Tests.Parser_Data.XML_Reader.Reader (Provider);
 begin
+   Input.Open_By_File_Name (League.Application.Arguments.Element (1));
+   Reader.Set_Content_Handler (Handler'Unchecked_Access);
+   Reader.Set_Input_Source (Input'Unchecked_Access);
+   Reader.Parse;
+
    Incr.Documents.Constructors.Initialize (Document.all);
    Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
 
-   Document.End_Of_Stream.Set_Text
-     (League.Strings.To_Universal_String ("a1"));
+   for Command of Handler.Get_Commands loop
+      case Command.Kind is
+         when Tests.Commands.Commit =>
+            Document.Commit;
 
-   Document.Commit;
+         when Tests.Commands.Set_EOS_Text =>
+            Document.End_Of_Stream.Set_Text (Command.Text);
 
-   Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 386900059);
+         when Tests.Commands.Set_Token_Text =>
+            declare
+               Token : Incr.Nodes.Tokens.Token_Access :=
+                 Document.Start_Of_Stream;
+            begin
+               for J in 2 .. Command.Token loop
+                  Token := Token.Next_Token (History.Changing);
+               end loop;
 
-   Incr_Parser.Run
-     (Lexer     => Incr_Lexer,
-      Provider  => Provider,
-      Factory   => Node_Factory,
-      Document  => Document,
-      Reference => Ref);
+               Token.Set_Text (Command.Text);
+            end;
+         when Tests.Commands.Dump_Tree =>
+            declare
+               use type League.Strings.Universal_String;
 
-   Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 1175601664);
+               Vector : XML.Templates.Streams.XML_Stream_Element_Vectors.
+                 Vector;
+               Text   : League.Strings.Universal_String;
+               Expect : League.Strings.Universal_String;
+            begin
+               Dump (Document.Ultra_Root, Vector);
+               Text := To_String (Vector);
+               Expect := To_String (Command.Dump);
+               Ada.Wide_Wide_Text_IO.Put_Line
+                 (Text.To_Wide_Wide_String);
 
-   Ref := History.Changing;
-   Document.Commit;
+               if Text /= Expect then
+                  Ada.Wide_Wide_Text_IO.Put_Line ("DOESN'T MATCH!!!");
+                  Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
+                  return;
+               end if;
+            end;
 
-   Document.End_Of_Stream.Set_Text
-     (League.Strings.To_Universal_String ("2"));
-
-   Document.Commit;
-
-   Incr_Parser.Run
-     (Lexer     => Incr_Lexer,
-      Provider  => Provider,
-      Factory   => Node_Factory,
-      Document  => Document,
-      Reference => Ref);
-
-   Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 2895785183);
-
-   Ref := History.Changing;
-   Document.Commit;
-
-   Document.Start_Of_Stream.Next_Token (Ref).Set_Text
-     (League.Strings.Empty_Universal_String);
-
-   Document.End_Of_Stream.Previous_Token (Ref).Set_Text
-     (League.Strings.Empty_Universal_String);
-
-   Document.Commit;
-
-   Incr_Parser.Run
-     (Lexer     => Incr_Lexer,
-      Provider  => Provider,
-      Factory   => Node_Factory,
-      Document  => Document,
-      Reference => Ref);
-
-   Dump (Hash, Document.Ultra_Root, "");
-   pragma Assert (Hash = 3276322090);
+         when Tests.Commands.Run =>
+            Incr_Parser.Run
+              (Lexer     => Incr_Lexer,
+               Provider  => Provider.all'Unchecked_Access,
+               Factory   => Provider.all'Unchecked_Access,
+               Document  => Document,
+               Reference => Ref);
+            Ref := History.Changing;
+      end case;
+   end loop;
 
 end Tests.Driver;
