@@ -62,6 +62,7 @@ package body Incr.Nodes is
       procedure Initialize (Self : aliased in out Node_With_Parent'Class) is
       begin
          Versioned_Booleans.Initialize (Self.Exist, False);
+         Versioned_Booleans.Initialize (Self.LC, False);
          Versioned_Booleans.Initialize (Self.LE, False);
          Versioned_Nodes.Initialize (Self.Parent, null);
       end Initialize;
@@ -75,6 +76,7 @@ package body Incr.Nodes is
          Parent  : Node_Access) is
       begin
          Versioned_Booleans.Initialize (Self.Exist, True);
+         Versioned_Booleans.Initialize (Self.LC, False);
          Versioned_Booleans.Initialize (Self.LE, False);
          Versioned_Nodes.Initialize (Self.Parent, Parent);
       end Initialize_Ancient;
