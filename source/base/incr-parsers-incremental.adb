@@ -100,11 +100,15 @@ package body Incr.Parsers.Incremental is
         (Node : Nodes.Node_Access) return Nodes.Node_Access;
 
       procedure Right_Breakdown;
+      procedure Recover (LA : out Nodes.Node_Access);
+      procedure Recover_2 (LA : out Nodes.Node_Access);
 
       Stack  : Parser_Stack;
       State  : Parser_State := 1;
       Now    : constant Version_Trees.Version := Document.History.Changing;
 
+      Previous    : constant Version_Trees.Version :=
+        Document.History.Parent (Now);
       Next_Action : constant Action_Table_Access := Provider.Actions;
       Next_State  : constant State_Table_Access := Provider.States;
       Counts      : constant Parts_Count_Table_Access := Provider.Part_Counts;
@@ -208,6 +212,242 @@ package body Incr.Parsers.Incremental is
          Self.Node (Self.Top) := Node;
       end Push;
 
+      -------------
+      -- Recover --
+      -------------
+
+      procedure Recover (LA : out Nodes.Node_Access) is
+      begin
+         --  Remove any default reductions from the parse stack
+         Right_Breakdown;
+         Recover_2 (LA);
+      end Recover;
+
+      ---------------
+      -- Recover_2 --
+      ---------------
+
+      procedure Recover_2 (LA : out Nodes.Node_Access) is
+
+         type Offset_Array is array (Positive range <>) of Natural;
+
+         function Is_Valid_Isolation
+           (Node   : Nodes.Node_Access;
+            Offset : Natural;
+            State  : Parser_State) return Boolean;
+
+         function Node_Offset
+           (Node : Nodes.Node_Access;
+            Time : Version_Trees.Version) return Natural;
+         --  Compute offset of Node in given Time
+
+         function Get_Cut
+           (Node   : Nodes.Node_Access;
+            Offset : Offset_Array;
+            Top    : Positive) return Natural;
+         --  Compute stack entry corresponding to leading edge of node’s
+         --  subtree in the previous version. Returns False if no entry is
+         --  so aligned. Top limits stack depth search.
+
+         procedure Isolate (Node : Nodes.Node_Access; Top : Positive);
+         --  Resets configuration so parsing can continue.
+
+         procedure Refine (Node : Nodes.Node_Access);
+         --  Isolate the argument and recursively recover the subtree that it
+         --  roots.
+
+         procedure Discard_Changes_And_Mark_Errors (Node : Nodes.Node_Access);
+
+         Jam_Offset : Natural;
+
+         -------------------------------------
+         -- Discard_Changes_And_Mark_Errors --
+         -------------------------------------
+
+         procedure Discard_Changes_And_Mark_Errors
+           (Node : Nodes.Node_Access) is
+         begin
+            Node.Discard;
+
+            if Node.Local_Changes (Reference, Now) then
+               Node.Set_Local_Errors (True);
+            end if;
+         end Discard_Changes_And_Mark_Errors;
+
+         -------------
+         -- Get_Cut --
+         -------------
+
+         function Get_Cut
+           (Node   : Nodes.Node_Access;
+            Offset : Offset_Array;
+            Top    : Positive) return Natural
+         is
+            Old_Offset : constant Natural := Node_Offset (Node, Previous);
+         begin
+            for J in 1 .. Top loop
+               if Offset (J) > Old_Offset then
+                  return 0;
+               elsif Offset (J) = Old_Offset then
+                  return J;
+               end if;
+            end loop;
+
+            return 0;
+         end Get_Cut;
+
+         ------------------------
+         -- Is_Valid_Isolation --
+         ------------------------
+
+         function Is_Valid_Isolation
+           (Node   : Nodes.Node_Access;
+            Offset : Natural;
+            State  : Parser_State) return Boolean
+         is
+            Old_Offset : constant Natural := Node_Offset (Node, Previous);
+         begin
+            if Offset /= Old_Offset then
+               --  The starting offset of the subtree must be the same in both
+               --  the previous and current versions.
+               --  I have no idea how this could fail???
+               return False;
+            elsif Offset > Jam_Offset then
+               --  Cannot be to the right of the point where the error was
+               --  detected by the parser.
+               return False;
+            elsif Offset + Node.Span (Nodes.Text_Length, Previous) <
+              Jam_Offset
+            then
+               --  The ending offset must meet or exceed the detection point.
+               return False;
+            end if;
+
+            --  Now see if the parser is willing to accept this isolation, as
+            --  determined by the shiftability of its root symbol in the
+            --  given state.
+
+            return Next_Action (State, Node.Kind).Kind = Shift;
+         end Is_Valid_Isolation;
+
+         -------------
+         -- Isolate --
+         -------------
+
+         procedure Isolate (Node : Nodes.Node_Access; Top : Positive) is
+         begin
+            Refine (Node);
+            State := Stack.State (Top + 1);
+            Stack.Top := Top;
+            Do_Shift (Node);
+            LA := Node.Next_Subtree (Reference);
+         end Isolate;
+
+         -----------------
+         -- Node_Offset --
+         -----------------
+
+         function Node_Offset
+           (Node : Nodes.Node_Access;
+            Time : Version_Trees.Version) return Natural
+         is
+            use type Nodes.Node_Access;
+            Left   : Nodes.Node_Access := Node.Previous_Subtree (Time);
+            Result : Natural := 0;
+         begin
+            while Left /= null loop
+               Result := Result + Left.Span (Nodes.Text_Length, Time);
+               Left := Left.Previous_Subtree (Time);
+            end loop;
+
+            return Result;
+         end Node_Offset;
+
+         ------------
+         -- Refine --
+         ------------
+
+         procedure Refine (Node : Nodes.Node_Access) is
+            procedure Pass_2 (Node : Nodes.Node_Access; Offset : Natural);
+
+            ------------
+            -- Pass_2 --
+            ------------
+
+            procedure Pass_2 (Node : Nodes.Node_Access; Offset : Natural) is
+               Prev  : Natural := Offset;
+               Next  : Natural;
+               Child : Nodes.Node_Access;
+            begin
+               for J in 1 .. Node.Arity loop
+                  Child := Node.Child (J, Now);
+                  Next := Prev + Child.Span (Nodes.Text_Length, Now);
+
+--                  if Prev <= Jam_Offset and Jam_Offset < Next then
+                  Discard_Changes_And_Mark_Errors (Node);
+--                  end if;
+
+                  Pass_2 (Child, Next);
+                  Prev := Next;
+               end loop;
+            end Pass_2;
+
+            Old_Offset : constant Natural := Node_Offset (Node, Previous);
+
+         begin
+            Node.Discard;
+            Node.Set_Local_Errors (False);
+            Pass_2 (Node, Old_Offset);
+         end Refine;
+
+         use type Nodes.Node_Access;
+         Ancestor : Nodes.Node_Access;
+         Node : Nodes.Node_Access;
+         Cut   : Natural;  --  Stack index or zero
+         Offset : Offset_Array (1 .. Stack.Top) := (1, others => <>);
+         --  Computed offset of leftmost character not to the left of the
+         --  Index-th stack entry. (In current version).
+      begin
+         for J in 1 .. Stack.Top - 1 loop
+            Offset (J + 1) := Offset (J) +
+              Stack.Node (J).Span (Nodes.Text_Length, Now);
+         end loop;
+
+         Jam_Offset := Offset (Stack.Top);
+
+         --  Consider each node on the stack, until we reach bos.
+         for J in reverse 1 .. Stack.Top loop
+            Node := Stack.Node (J);
+            --  If the root of this subtree is new, keep looking down the
+            --  parse stack.
+            if Node.Exists (Previous) then
+               if Is_Valid_Isolation (Node, Offset (J), Stack.State (J)) then
+                  Isolate (Node, J);
+                  --  Isolate (Node, SP, 1);
+                  return;
+               end if;
+
+               --  Try searching node's ancestors.
+               loop
+                  Ancestor := Node.Parent (Previous);
+                  exit when Ancestor = Document.Ultra_Root;
+                  Cut := Get_Cut (Ancestor, Offset, J);
+                  exit when Cut = 0;
+                  --  if not chached
+
+                  if Is_Valid_Isolation
+                    (Ancestor, Offset (Cut), Stack.State (Cut))
+                  then
+                     Isolate (Ancestor, Cut);
+                     return;
+                  end if;
+
+                  Node := Ancestor;
+               end loop;
+            end if;
+         end loop;
+      end Recover_2;
+
       ---------------------
       -- Right_Breakdown --
       ---------------------
@@ -279,7 +519,7 @@ package body Incr.Parsers.Incremental is
                         return;
                      end;
                   else
-                     raise Constraint_Error;
+                     Recover (Nodes.Node_Access (LA));
                   end if;
 
                when Reduce =>
@@ -308,7 +548,7 @@ package body Incr.Parsers.Incremental is
                      Verify := False;
                      Right_Breakdown;
                   else
-                     raise Constraint_Error;
+                     Recover (Nodes.Node_Access (LA));
                   end if;
 
             end case;
