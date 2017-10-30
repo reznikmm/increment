@@ -62,6 +62,7 @@ package body Incr.Nodes is
       procedure Initialize (Self : aliased in out Node_With_Parent'Class) is
       begin
          Versioned_Booleans.Initialize (Self.Exist, False);
+         Versioned_Booleans.Initialize (Self.LE, False);
          Versioned_Nodes.Initialize (Self.Parent, null);
       end Initialize;
 
@@ -74,6 +75,7 @@ package body Incr.Nodes is
          Parent  : Node_Access) is
       begin
          Versioned_Booleans.Initialize (Self.Exist, True);
+         Versioned_Booleans.Initialize (Self.LE, False);
          Versioned_Nodes.Initialize (Self.Parent, Parent);
       end Initialize_Ancient;
 
@@ -210,6 +212,17 @@ package body Incr.Nodes is
 
       return False;
    end Local_Changes;
+
+   ------------------
+   -- Local_Errors --
+   ------------------
+
+   overriding function Local_Errors
+     (Self : Node_With_Exist;
+      Time : Version_Trees.Version) return Boolean is
+   begin
+      return Versioned_Booleans.Get (Self.LE, Time);
+   end Local_Errors;
 
    ------------------
    -- Next_Subtree --
@@ -376,6 +389,21 @@ package body Incr.Nodes is
          Self.Update_Local_Changes (To_Diff (After));
       end if;
    end Set_Flag;
+
+   ----------------------
+   -- Set_Local_Errors --
+   ----------------------
+
+   overriding procedure Set_Local_Errors
+     (Self  : in out Node_With_Exist;
+      Value : Boolean := True)
+   is
+      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+      Diff : Integer := 0;
+   begin
+      Versioned_Booleans.Set (Self.LE, Value, Now, Diff);
+      Self.Update_Local_Changes (Diff);
+   end Set_Local_Errors;
 
    ----------------
    -- Set_Parent --

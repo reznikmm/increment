@@ -111,6 +111,21 @@ package Incr.Nodes is
       To   : Version_Trees.Version) return Boolean is abstract;
    --  Check if node itself was changed in any way between given two versions.
 
+   not overriding function Nested_Errors
+     (Self : Node;
+      Time : Version_Trees.Version) return Boolean is abstract;
+   --  Check if any node under subtree rooted by Self (exluding Self node)
+   --  has errors in given version.
+
+   not overriding function Local_Errors
+     (Self : Node;
+      Time : Version_Trees.Version) return Boolean is abstract;
+   --  Check if node itself has errors in given version.
+
+   not overriding procedure Set_Local_Errors
+     (Self  : in out Node;
+      Value : Boolean := True) is abstract;
+
    not overriding function Parent
      (Self  : Node;
       Time  : Version_Trees.Version) return Node_Access is abstract;
@@ -210,6 +225,7 @@ private
    type Node_With_Exist is abstract new Node with record
       Exist : Versioned_Booleans.Container;
       LC    : Versioned_Booleans.Container;  -- Versioned local changes
+      LE    : Versioned_Booleans.Container;  -- Versioned local errors
       --  Transient fields valid during current version only
       Local_Changes  : Natural := 0;
       Nested_Changes : Natural := 0;
@@ -243,6 +259,14 @@ private
      (Self : Node_With_Exist;
       From : Version_Trees.Version;
       To   : Version_Trees.Version) return Boolean;
+
+   overriding function Local_Errors
+     (Self : Node_With_Exist;
+      Time : Version_Trees.Version) return Boolean;
+
+   overriding procedure Set_Local_Errors
+     (Self  : in out Node_With_Exist;
+      Value : Boolean := True);
 
    type Node_With_Parent is abstract new Node_With_Exist with record
       Parent : Versioned_Nodes.Container;

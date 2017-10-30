@@ -23,6 +23,7 @@ package body Incr.Nodes.Joints is
 
          Nodes.Constructors.Initialize (Self);
          Versioned_Booleans.Initialize (Self.NC, False);
+         Versioned_Booleans.Initialize (Self.NE, False);
          Versioned_Booleans.Set (Self.Exist, True, Now, Diff);
 
          for J in Children'Range loop
@@ -48,6 +49,7 @@ package body Incr.Nodes.Joints is
          Self.Kind := 1;  --  ???
          Nodes.Constructors.Initialize_Ancient (Self, Parent);
          Versioned_Booleans.Initialize (Self.NC, False);
+         Versioned_Booleans.Initialize (Self.NE, False);
       end Initialize_Ancient;
 
    end Constructors;
@@ -144,11 +146,25 @@ package body Incr.Nodes.Joints is
       return False;
    end Nested_Changes;
 
+   -------------------
+   -- Nested_Errors --
+   -------------------
+
+   overriding function Nested_Errors
+     (Self : Joint;
+      Time : Version_Trees.Version) return Boolean is
+   begin
+      return Versioned_Booleans.Get (Self.NE, Time);
+   end Nested_Errors;
+
    ---------------
    -- On_Commit --
    ---------------
 
    overriding procedure On_Commit (Self : in out Joint) is
+      Now  : constant Version_Trees.Version := Self.Document.History.Changing;
+      Child  : Nodes.Node_Access;
+      Errors : Boolean := False;
       Ignore : Integer := 0;
    begin
       Versioned_Booleans.Set
@@ -158,6 +174,17 @@ package body Incr.Nodes.Joints is
          Changes => Ignore);
 
       Node_With_Parent (Self).On_Commit;
+
+      for J in Self.Kids'Range loop
+         Child := Self.Child (J, Now);
+
+         if Child.Nested_Errors (Now) or else Child.Local_Errors (Now) then
+            Errors := True;
+            exit;
+         end if;
+      end loop;
+
+      Versioned_Booleans.Set (Self.NE, Errors, Now, Ignore);
    end On_Commit;
 
    ---------------

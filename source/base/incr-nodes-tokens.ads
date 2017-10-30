@@ -146,6 +146,10 @@ private
       From : Version_Trees.Version;
       To   : Version_Trees.Version) return Boolean;
 
+   overriding function Nested_Errors
+     (Self : Token;
+      Time : Version_Trees.Version) return Boolean is (False);
+
    overriding function Span
      (Self : aliased in out Token;
       Kind : Span_Kinds;

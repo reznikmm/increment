@@ -161,6 +161,27 @@ package body Incr.Nodes.Ultra_Roots is
       return False;
    end Local_Changes;
 
+   -------------------
+   -- Nested_Errors --
+   -------------------
+
+   overriding function Nested_Errors
+     (Self : Ultra_Root;
+      Time : Version_Trees.Version) return Boolean
+   is
+      Child : Nodes.Node_Access;
+   begin
+      for J in 1 .. 3 loop
+         Child := Self.Child (J, Time);
+
+         if Child.Local_Errors (Time) or else Child.Nested_Errors (Time) then
+            return True;
+         end if;
+      end loop;
+
+      return False;
+   end Nested_Errors;
+
    --------------------
    -- Nested_Changes --
    --------------------

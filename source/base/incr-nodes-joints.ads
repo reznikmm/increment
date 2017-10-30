@@ -36,6 +36,7 @@ private
       Kind       : Node_Kind;
       Kids       : Versioned_Node_Array (1 .. Arity);
       NC         : Versioned_Booleans.Container;
+      NE         : Versioned_Booleans.Container;
       Span_Cache : Cached_Spans;
    end record;
 
@@ -59,6 +60,10 @@ private
      (Self : Joint;
       From : Version_Trees.Version;
       To   : Version_Trees.Version) return Boolean;
+
+   overriding function Nested_Errors
+     (Self : Joint;
+      Time : Version_Trees.Version) return Boolean;
 
    overriding function Span
      (Self : aliased in out Joint;
