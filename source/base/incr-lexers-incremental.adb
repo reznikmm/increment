@@ -72,11 +72,19 @@ package body Incr.Lexers.Incremental is
    begin
       if Node.Is_Token and then Node.Local_Changes (Reference, Previous) then
          declare
-            Token  : constant Nodes.Tokens.Token_Access :=
+            use type League.Strings.Universal_String;
+
+            Token   : constant Nodes.Tokens.Token_Access :=
               Nodes.Tokens.Token_Access (Node);
+            Current : constant League.Strings.Universal_String :=
+              Token.Text (Previous);
+            Before  : constant League.Strings.Universal_String :=
+              Token.Text (Reference);
          begin
             --  Handle textual changes.
-            Mark_From (Token, Reference);
+            if Current /= Before then
+               Mark_From (Token, Reference);
+            end if;
          end;
       else
          --  Handle structural changes.
