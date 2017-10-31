@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <incr>
-  <names term=" 3" nt=" 3">
+  <!--
+Grammar:
+list ::= {tok};
+tok ::= Ident | Number | New_Line;
+  -->
+  <names term=" 4" nt=" 3">
+    <name name="Comma"/>
     <name name="Ident"/>
     <name name="New_Line"/>
     <name name="Number"/>
@@ -11,7 +17,7 @@
   <counts> 1 0 1 1 1 2 1</counts>
   <nt> 1-2 3-5 6-7</nt>
   <states count=" 8"> 5 6 7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8 0 0 0 0</states>
-  <actions> 2 S4 S3 S2 S5 S6 S7 4 4 4 4 E 4 E 5 5 5 5 E 5 E 3 3 3 3 E 3 E F E E E E E E 7 7 7 7 E 7 E 1 S4 S3 S2 E S8 E 6 6 6 6 E 6 E</actions>
+  <actions> 2 E S4 S3 S2 S5 S6 S7 4 E 4 4 4 E 4 E 5 E 5 5 5 E 5 E 3 E 3 3 3 E 3 E F E E E E E E E 7 E 7 7 7 E 7 E 1 E S4 S3 S2 E S8 E 6 E 6 6 6 E 6 E</actions>
 
   <set-eos-text>a1</set-eos-text>
   <commit/>

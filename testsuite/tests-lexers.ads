@@ -66,6 +66,6 @@ package Tests.Lexers is
      (To_Class    => Tables.To_Class,
       Switch      => Tables.Switch,
       Rule        => Tables.Rule,
-      Error_State => 4);
+      Error_State => 5);
 
 end Tests.Lexers;

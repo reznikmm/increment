@@ -1,5 +1,6 @@
 %%
 
+,               {Comma}
 [a-zA-Z]+       {Ident}
 \n              {New_Line}
 [0-9]+          {Number}
