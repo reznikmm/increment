@@ -166,7 +166,7 @@ package body Incr.Lexers.Incremental is
       Self.Batch.Set_Start_Condition (Self.State);
       --  Self.New_State defined in Next_New_Token
 
-      Self.Prev_Token := null;
+      Self.Prev_Token := (null, null);
       Self.Last_Reused := null;
       Self.Token := Token;
       Self.Count := 0;
@@ -197,7 +197,8 @@ package body Incr.Lexers.Incremental is
          end if;
 
          if Self.Token /= Self.Last_Reused then
-            Self.Prev_Token := Self.Token;
+            Self.Prev_Token (1) := Self.Prev_Token (2);
+            Self.Prev_Token (2) := Self.Token;
          end if;
 
          Self.Token := Token;
@@ -315,13 +316,20 @@ package body Incr.Lexers.Incremental is
       Self.Count := Self.Count - Value.Length;
       Self.New_State := Self.Batch.Get_Start_Condition;
 
-      if Could_Be_Reused (Self.Prev_Token, Rule) then
-         Result := Self.Prev_Token;
+      if Could_Be_Reused (Self.Prev_Token (1), Rule) then
+         Result := Self.Prev_Token (1);
          Result.Set_Text (Value);
          Result.Set_Local_Errors (False);
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
-         Self.Prev_Token := null;
+         Self.Prev_Token (1) := null;
+      elsif Could_Be_Reused (Self.Prev_Token (2), Rule) then
+         Result := Self.Prev_Token (2);
+         Result.Set_Text (Value);
+         Result.Set_Local_Errors (False);
+--           Result.Set_State (Self.New_State);
+--           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
+         Self.Prev_Token := (null, null);
       elsif Could_Be_Reused (Self.Token, Rule) then
          Self.Last_Reused := Self.Token;
          Result := Self.Token;

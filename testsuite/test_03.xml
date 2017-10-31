@@ -5,7 +5,7 @@ Grammar:
 root ::= (row) [row];
 row ::= Ident Comma Number;
 
-Trying error recovery: "a,1" -> "a,b" -> "a,2"
+Trying error recovery: "a,1" -> "ab1" -> "a,1"
 -->
   <names term=" 4" nt=" 2">
     <name name="Comma"/>
@@ -44,7 +44,7 @@ Trying error recovery: "a,1" -> "a,b" -> "a,2"
       <token kind='EOF' lc='y'/>
     </node>
   </dump-tree>
-  <set-token-text index='4'>b</set-token-text>
+  <set-token-text index='3'>b</set-token-text>
   <commit/>
   <run/>
   <commit/>
@@ -53,15 +53,15 @@ Trying error recovery: "a,1" -> "a,b" -> "a,2"
       <token kind='EOF'/>
       <node kind='root' nc='y' lc='y' ne='y'>
         <node kind='row' nc='y' ne='y'>
-          <token kind='Ident'>a</token>
-          <token kind='Comma' lc='y' le='y'>,</token>
-          <token kind='Number' lc='y' le='y'>b</token>
+          <token kind='Ident' lc='y' le='y'>a</token>
+          <token kind='Comma' lc='y' le='y'>b</token>
+          <token kind='Number'>1</token>
         </node>
       </node>
       <token kind='EOF'/>
     </node>
   </dump-tree>
-  <set-token-text index='4'>2</set-token-text>
+  <set-token-text index='3'>,</set-token-text>
   <commit/>
   <run/>
   <commit/>
@@ -70,9 +70,9 @@ Trying error recovery: "a,1" -> "a,b" -> "a,2"
       <token kind='EOF'/>
       <node kind='root' nc='y' lc='y'>
         <node kind='row' nc='y' lc='y'>
-          <token kind='Ident'>a</token>
+          <token kind='Ident' lc='y'>a</token>
           <token kind='Comma' lc='y'>,</token>
-          <token kind='Number' lc='y'>2</token>
+          <token kind='Number'>1</token>
         </node>
       </node>
       <token kind='EOF'/>

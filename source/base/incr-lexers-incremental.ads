@@ -115,13 +115,15 @@ package Incr.Lexers.Incremental is
 
 private
 
+   type Token_Pair is array (1 .. 2) of Nodes.Tokens.Token_Access;
+
    type Incremental_Lexer is new Batch_Lexers.Abstract_Source with record
       Batch       : Batch_Lexers.Batch_Lexer_Access;
       Document    : Documents.Document_Access;
       Reference   : Version_Trees.Version;  --  Last analyzed version
       Previous    : Version_Trees.Version;  --  Version to analyze
       Token       : Nodes.Tokens.Token_Access;
-      Prev_Token  : Nodes.Tokens.Token_Access;
+      Prev_Token  : Token_Pair;
       Last_Reused : Nodes.Tokens.Token_Access;
       Count       : Integer;  --  Number of chars piped before Token
       State       : Batch_Lexers.State;  --  Lexer State before Token
