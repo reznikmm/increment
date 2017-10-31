@@ -16,4 +16,6 @@ source/generated/incr-ada_lexers-tables.adb: source/ada/ada.uaflex
 check: all
 	.objs/tests-driver testsuite/test_01.xml
 	.objs/tests-driver testsuite/test_02.xml
+	.objs/tests-driver testsuite/test_03.xml
+	.objs/tests-driver testsuite/test_04.xml
 	@echo Tests OK!

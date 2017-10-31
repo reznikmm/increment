@@ -218,8 +218,11 @@ package body Incr.Parsers.Incremental is
 
       procedure Recover (LA : out Nodes.Node_Access) is
       begin
-         --  Remove any default reductions from the parse stack
-         Right_Breakdown;
+         if Stack.Top > 1 then
+            --  Remove any default reductions from the parse stack
+            Right_Breakdown;
+         end if;
+
          Recover_2 (LA);
       end Recover;
 
@@ -387,6 +390,8 @@ package body Incr.Parsers.Incremental is
             begin
                for J in 1 .. Node.Arity loop
                   Child := Node.Child (J, Now);
+                  --  I doubt getting span in current version will work due to
+                  --  its caching in the node.
                   Next := Prev + Child.Span (Nodes.Text_Length, Now);
 
 --                  if Prev <= Jam_Offset and Jam_Offset < Next then
@@ -452,6 +457,15 @@ package body Incr.Parsers.Incremental is
                end loop;
             end if;
          end loop;
+
+         --  Isolate root non-terminal
+         Node := Document.Ultra_Root.Child (2, Reference);
+
+         if Stack.Top = 1 then
+            Do_Shift (Node);
+         end if;
+
+         Isolate (Node, 2);
       end Recover_2;
 
       ---------------------

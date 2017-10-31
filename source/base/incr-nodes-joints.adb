@@ -234,14 +234,8 @@ package body Incr.Nodes.Joints is
          return Result;
       end Get_Span;
 
-      Now : constant Version_Trees.Version := Self.Document.History.Changing;
-
       Cached : Cached_Integer renames Self.Span_Cache (Kind);
    begin
-      if Time = Now then
-         raise Constraint_Error with "Not implemented";
-      end if;
-
       if Cached.Value = -1 or else Cached.Time /= Time then
          Cached.Value := Get_Span;
          Cached.Time := Time;
