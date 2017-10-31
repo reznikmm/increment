@@ -109,7 +109,7 @@ procedure Tests.Driver is
          (Node.Document.History.Changing);
 
       function Prev return Incr.Version_Trees.Version is
-         (Node.Document.History.Parent (Now));
+         (Node.Document.History.Parent (Node.Document.History.Parent (Now)));
 
       function Common_Attributes return XML.SAX.Attributes.SAX_Attributes;
 
@@ -129,6 +129,18 @@ procedure Tests.Driver is
          if Node.Local_Changes (Prev, Now) then
             Result.Set_Value
               (Qualified_Name => +"lc",
+               Value          => +"y");
+         end if;
+
+         if Node.Nested_Errors (Now) then
+            Result.Set_Value
+              (Qualified_Name => +"ne",
+               Value          => +"y");
+         end if;
+
+         if Node.Local_Errors (Now) then
+            Result.Set_Value
+              (Qualified_Name => +"le",
                Value          => +"y");
          end if;
          return Result;

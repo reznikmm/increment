@@ -25,10 +25,11 @@ tok ::= Ident | Number | New_Line;
     <node kind='EOF' nc='y'>
       <token kind='EOF'></token>
       <null/>
-      <token kind='EOF'>a1</token>
+      <token kind='EOF' lc='y'>a1</token>
     </node>
   </dump-tree>
   <run/>
+  <commit/>
   <dump-tree>
     <node kind='EOF' nc='y' lc='y'>
       <token kind='EOF' lc='y'/>
@@ -47,10 +48,10 @@ tok ::= Ident | Number | New_Line;
       <token kind='EOF' lc='y'/>
     </node>
   </dump-tree>
-  <commit/>
   <set-eos-text>2</set-eos-text>
   <commit/>
   <run/>
+  <commit/>
   <dump-tree>
     <node kind='EOF' nc='y' lc='y'>
       <token kind='EOF'/>
@@ -69,11 +70,11 @@ tok ::= Ident | Number | New_Line;
       <token kind='EOF' lc='y'/>
     </node>
   </dump-tree>
-  <commit/>
   <set-token-text index='2'/>
   <set-token-text index='3'/>
   <commit/>
   <run/>
+  <commit/>
   <dump-tree>
     <node kind='EOF' nc='y' lc='y'>
       <token kind='EOF' lc='y'></token>
