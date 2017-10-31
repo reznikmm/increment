@@ -289,6 +289,12 @@ package body Incr.Parsers.Incremental is
                if Offset (J) > Old_Offset then
                   return 0;
                elsif Offset (J) = Old_Offset then
+                  for K in J + 1 .. Top loop
+                     if Offset (K) /= Offset (J) then
+                        return K - 1;
+                     end if;
+                  end loop;
+
                   return J;
                end if;
             end loop;
@@ -316,7 +322,7 @@ package body Incr.Parsers.Incremental is
                --  Cannot be to the right of the point where the error was
                --  detected by the parser.
                return False;
-            elsif Offset + Node.Span (Nodes.Text_Length, Previous) <
+            elsif Offset + Node.Span (Nodes.Text_Length, Previous) <=
               Jam_Offset
             then
                --  The ending offset must meet or exceed the detection point.
@@ -337,8 +343,8 @@ package body Incr.Parsers.Incremental is
          procedure Isolate (Node : Nodes.Node_Access; Top : Positive) is
          begin
             Refine (Node);
-            State := Stack.State (Top + 1);
-            Stack.Top := Top;
+            State := Stack.State (Top);
+            Stack.Top := Top - 1;
             Do_Shift (Node);
             LA := Node.Next_Subtree (Reference);
          end Isolate;
@@ -384,7 +390,7 @@ package body Incr.Parsers.Incremental is
                   Next := Prev + Child.Span (Nodes.Text_Length, Now);
 
 --                  if Prev <= Jam_Offset and Jam_Offset < Next then
-                  Discard_Changes_And_Mark_Errors (Node);
+                  Discard_Changes_And_Mark_Errors (Child);
 --                  end if;
 
                   Pass_2 (Child, Next);
@@ -404,16 +410,16 @@ package body Incr.Parsers.Incremental is
          Ancestor : Nodes.Node_Access;
          Node : Nodes.Node_Access;
          Cut   : Natural;  --  Stack index or zero
-         Offset : Offset_Array (1 .. Stack.Top) := (1, others => <>);
+         Offset : Offset_Array (1 .. Stack.Top + 1) := (0, others => <>);
          --  Computed offset of leftmost character not to the left of the
          --  Index-th stack entry. (In current version).
       begin
-         for J in 1 .. Stack.Top - 1 loop
+         for J in 1 .. Stack.Top loop
             Offset (J + 1) := Offset (J) +
               Stack.Node (J).Span (Nodes.Text_Length, Now);
          end loop;
 
-         Jam_Offset := Offset (Stack.Top);
+         Jam_Offset := Offset (Offset'Last);
 
          --  Consider each node on the stack, until we reach bos.
          for J in reverse 1 .. Stack.Top loop

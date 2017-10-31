@@ -174,8 +174,10 @@ package body Incr.Nodes.Ultra_Roots is
       for J in 1 .. 3 loop
          Child := Self.Child (J, Time);
 
-         if Child.Local_Errors (Time) or else Child.Nested_Errors (Time) then
-            return True;
+         if Child /= null then
+            if Child.Local_Errors (Time) or Child.Nested_Errors (Time) then
+               return True;
+            end if;
          end if;
       end loop;
 

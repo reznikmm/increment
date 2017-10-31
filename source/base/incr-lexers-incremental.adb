@@ -318,6 +318,7 @@ package body Incr.Lexers.Incremental is
       if Could_Be_Reused (Self.Prev_Token, Rule) then
          Result := Self.Prev_Token;
          Result.Set_Text (Value);
+         Result.Set_Local_Errors (False);
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
          Self.Prev_Token := null;
@@ -325,6 +326,7 @@ package body Incr.Lexers.Incremental is
          Self.Last_Reused := Self.Token;
          Result := Self.Token;
          Result.Set_Text (Value);
+         Result.Set_Local_Errors (False);
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
       else

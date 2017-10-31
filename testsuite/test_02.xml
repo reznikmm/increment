@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<incr>
+  <!--
+Grammar:
+root ::= (row) [row];
+row ::= Ident Comma Number;
+-->
+  <names term=" 4" nt=" 2">
+    <name name="Comma"/>
+    <name name="Ident"/>
+    <name name="New_Line"/>
+    <name name="Number"/>
+    <name name="root"/>
+    <name name="row"/>
+  </names>
+  <counts> 1 0 3</counts>
+  <nt> 1-2 3-3</nt>
+  <states count=" 6"> 3 4 0 0 0 0 0 0 0 0 0 0</states>
+  <actions> 2 E S2 E E S3 S4 E S5 E E E E E F E E E E E E 1 E E E E E E E E E E S6 E E 3 E E E E E E</actions>
+
+  <set-eos-text>a,1</set-eos-text>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y'>
+      <token kind='EOF'></token>
+      <null/>
+      <token kind='EOF' lc='y'>a,1</token>
+    </node>
+  </dump-tree>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y'>
+      <token kind='EOF' lc='y'/>
+      <node kind='root' nc='y' lc='y'>
+        <node kind='row' nc='y' lc='y'>
+          <token kind='Ident' lc='y'>a</token>
+          <token kind='Comma' lc='y'>,</token>
+          <token kind='Number' lc='y'>1</token>
+        </node>
+      </node>
+      <token kind='EOF' lc='y'/>
+    </node>
+  </dump-tree>
+  <set-token-text index='4'>b</set-token-text>
+  <commit/>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y' ne='y'>
+      <token kind='EOF'/>
+      <node kind='root' nc='y' lc='y' ne='y'>
+        <node kind='row' nc='y' ne='y'>
+          <token kind='Ident'>a</token>
+          <token kind='Comma' lc='y' le='y'>,</token>
+          <token kind='Number' lc='y' le='y'>b</token>
+        </node>
+      </node>
+      <token kind='EOF'/>
+    </node>
+  </dump-tree>
+  <set-token-text index='4'>2</set-token-text>
+  <commit/>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y'>
+      <token kind='EOF'/>
+      <node kind='root' nc='y' lc='y'>
+        <node kind='row' nc='y' lc='y'>
+          <token kind='Ident'>a</token>
+          <token kind='Comma' lc='y'>,</token>
+          <token kind='Number' lc='y'>2</token>
+        </node>
+      </node>
+      <token kind='EOF'/>
+    </node>
+  </dump-tree>
+</incr>
