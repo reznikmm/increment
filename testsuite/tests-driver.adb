@@ -264,6 +264,7 @@ procedure Tests.Driver is
 
    Ref  : Incr.Version_Trees.Version := History.Parent (History.Changing);
 
+   Root    : Incr.Nodes.Node_Access;
    Input   : aliased XML.SAX.Input_Sources.Streams.Files.File_Input_Source;
    Reader  : XML.SAX.Simple_Readers.Simple_Reader;
    Handler : aliased Tests.Parser_Data.XML_Reader.Reader (Provider);
@@ -273,7 +274,19 @@ begin
    Reader.Set_Input_Source (Input'Unchecked_Access);
    Reader.Parse;
 
-   Incr.Documents.Constructors.Initialize (Document.all);
+   if Provider.Part_Counts (2) = 0 then
+      declare
+         Kind : Incr.Nodes.Node_Kind;
+      begin
+         Provider.Create_Node
+           (Prod     => 2,
+            Children => (1 .. 0 => <>),
+            Node     => Root,
+            Kind     => Kind);
+      end;
+   end if;
+
+   Incr.Documents.Constructors.Initialize (Document.all, Root);
    Incr_Lexer.Set_Batch_Lexer (Batch_Lexer);
 
    for Command of Handler.Get_Commands loop

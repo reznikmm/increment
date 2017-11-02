@@ -283,8 +283,9 @@ package body Incr.Nodes.Ultra_Roots is
       -- Initialize --
       ----------------
 
-      procedure Initialize (Self  : out Ultra_Root'Class) is
-         Root : constant Incr.Nodes.Joints.Joint_Access := null;
+      procedure Initialize
+        (Self  : out Ultra_Root'Class;
+         Root  : Nodes.Node_Access) is
       begin
          Self.BOS := new Nodes.Tokens.Token (Self.Document);
          Nodes.Tokens.Constructors.Initialize_Ancient
@@ -296,7 +297,13 @@ package body Incr.Nodes.Ultra_Roots is
            (Self   => Self.EOS.all,
             Parent => Self'Unchecked_Access);
 
-         Versioned_Nodes.Initialize (Self.Root, Nodes.Node_Access (Root));
+         if Root /= null then
+            Nodes.Joints.Constructors.Initialize_Ancient
+              (Self   => Nodes.Joints.Joint (Root.all),
+               Parent => Self'Unchecked_Access);
+         end if;
+
+         Versioned_Nodes.Initialize (Self.Root, Root);
       end Initialize;
 
    end Constructors;

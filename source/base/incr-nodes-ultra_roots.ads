@@ -55,7 +55,9 @@ package Incr.Nodes.Ultra_Roots is
    type Ultra_Root_Access is access all Ultra_Root'Class;
 
    package Constructors is
-      procedure Initialize (Self  : out Ultra_Root'Class);
+      procedure Initialize
+        (Self  : out Ultra_Root'Class;
+         Root  : Nodes.Node_Access);
    end Constructors;
 
 private

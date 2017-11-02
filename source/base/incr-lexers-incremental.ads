@@ -75,7 +75,7 @@ package Incr.Lexers.Incremental is
    type Incremental_Lexer is tagged limited private;
    --  Type to perform incremental lexical analysis
 
-   type Incremental_Lexer_Access is access Incremental_Lexer;
+   type Incremental_Lexer_Access is access all Incremental_Lexer;
 
    not overriding procedure Set_Batch_Lexer
      (Self  : in out Incremental_Lexer;

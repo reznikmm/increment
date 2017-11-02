@@ -46,7 +46,6 @@ package body Incr.Nodes.Joints is
         (Self   : out Joint'Class;
          Parent : Node_Access) is
       begin
-         Self.Kind := 1;  --  ???
          Nodes.Constructors.Initialize_Ancient (Self, Parent);
          Versioned_Booleans.Initialize (Self.NC, False);
          Versioned_Booleans.Initialize (Self.NE, False);

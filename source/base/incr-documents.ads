@@ -87,9 +87,11 @@ package Incr.Documents is
    --  Single point commit routine.
 
    package Constructors is
-      procedure Initialize (Self  : aliased in out Document'Class);
+      procedure Initialize
+        (Self : aliased in out Document'Class;
+         Root : Nodes.Node_Access);
       --  Initialze Self as new Document. Create sentinel nodes and reset
-      --  parsing tree root to null pointer.
+      --  parsing tree root to Root pointer.
    end Constructors;
 
 private
