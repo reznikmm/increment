@@ -482,7 +482,7 @@ package body Incr.Parsers.Incremental is
             exit when Node.Is_Token;
 
             for J in 1 .. Node.Arity loop
-               Do_Shift (Node.Child (J, Reference));
+               Do_Shift (Node.Child (J, Now));
             end loop;
 
             if Stack.Top = Limit then
