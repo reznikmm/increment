@@ -48,13 +48,14 @@ with Ada.Wide_Wide_Text_IO;
 with League.Application;
 with League.Strings;
 
-with XML.SAX.Attributes;
 with XML.SAX.Input_Sources.Streams.Files;
 with XML.SAX.Pretty_Writers;
 with XML.SAX.Simple_Readers;
 with XML.SAX.String_Output_Destinations;
 with XML.Templates.Streams;
+with XML.SAX.Writers;
 
+with Incr.Debug;
 with Incr.Documents;
 with Incr.Lexers.Batch_Lexers;
 with Incr.Lexers.Incremental;
@@ -68,23 +69,15 @@ with Tests.Parser_Data.XML_Reader;
 
 procedure Tests.Driver is
 
-   function "+" (Text : Wide_Wide_String)
-     return League.Strings.Universal_String
-       renames League.Strings.To_Universal_String;
-
    procedure Dump
-     (Node   : Incr.Nodes.Node_Access;
-      Vector : in out XML.Templates.Streams.XML_Stream_Element_Vectors.Vector);
+     (Document : Incr.Documents.Document'Class;
+      Result   : out League.Strings.Universal_String);
 
    function To_String
      (Vector : XML.Templates.Streams.XML_Stream_Element_Vectors.Vector)
        return League.Strings.Universal_String;
 
    type Provider_Access is access all Tests.Parser_Data.Provider;
-
-   Nil_Location : constant XML.Templates.Streams.Event_Location :=
-     (League.Strings.Empty_Universal_String, 0, 0);
-   Nil_Attributes : XML.SAX.Attributes.SAX_Attributes;
 
    History : constant Incr.Version_Trees.Version_Tree_Access :=
      new Incr.Version_Trees.Version_Tree;
@@ -100,117 +93,17 @@ procedure Tests.Driver is
    ----------
 
    procedure Dump
-     (Node   : Incr.Nodes.Node_Access;
-      Vector : in out XML.Templates.Streams.XML_Stream_Element_Vectors.Vector)
+     (Document : Incr.Documents.Document'Class;
+      Result   : out League.Strings.Universal_String)
    is
-      use XML.Templates.Streams;
-
-      function Now return Incr.Version_Trees.Version is
-         (Node.Document.History.Changing);
-
-      function Prev return Incr.Version_Trees.Version is
-         (Node.Document.History.Parent (Node.Document.History.Parent (Now)));
-
-      function Common_Attributes return XML.SAX.Attributes.SAX_Attributes;
-
-      function Common_Attributes return XML.SAX.Attributes.SAX_Attributes is
-         Result : XML.SAX.Attributes.SAX_Attributes;
-      begin
-         Result.Set_Value
-           (Qualified_Name => +"kind",
-            Value          => +Provider.Kind_Image (Node.Kind));
-
-         if Node.Nested_Changes (Prev, Now) then
-            Result.Set_Value
-              (Qualified_Name => +"nc",
-               Value          => +"y");
-         end if;
-
-         if Node.Local_Changes (Prev, Now) then
-            Result.Set_Value
-              (Qualified_Name => +"lc",
-               Value          => +"y");
-         end if;
-
-         if Node.Nested_Errors (Now) then
-            Result.Set_Value
-              (Qualified_Name => +"ne",
-               Value          => +"y");
-         end if;
-
-         if Node.Local_Errors (Now) then
-            Result.Set_Value
-              (Qualified_Name => +"le",
-               Value          => +"y");
-         end if;
-         return Result;
-      end Common_Attributes;
-
+      Output : aliased XML.SAX.String_Output_Destinations.
+        String_Output_Destination;
+      Writer : XML.SAX.Pretty_Writers.XML_Pretty_Writer;
    begin
-      if Node in null then
-         Vector.Append
-           ((Kind           => XML.Templates.Streams.Start_Element,
-             Namespace_URI  => +"",
-             Local_Name     => +"null",
-             Qualified_Name => +"null",
-             Attributes     => Nil_Attributes,
-             Location       => Nil_Location));
-         Vector.Append
-           ((Kind           => XML.Templates.Streams.End_Element,
-             Namespace_URI  => +"",
-             Local_Name     => +"null",
-             Qualified_Name => +"null",
-             Location       => Nil_Location));
-
-         return;
-      elsif Node.Is_Token then
-         declare
-            Token : constant Incr.Nodes.Tokens.Token_Access :=
-              Incr.Nodes.Tokens.Token_Access (Node);
-            Text : constant League.Strings.Universal_String :=
-              Token.Text (Now);
-         begin
-            Vector.Append
-              ((Kind           => XML.Templates.Streams.Start_Element,
-                Namespace_URI  => +"",
-                Local_Name     => +"token",
-                Qualified_Name => +"token",
-                Attributes     => Common_Attributes,
-                Location       => Nil_Location));
-            if not Text.Is_Empty then
-               Vector.Append
-                 ((Kind     => XML.Templates.Streams.Text,
-                   Text     => Text,
-                   Location => Nil_Location));
-            end if;
-            Vector.Append
-              ((Kind           => XML.Templates.Streams.End_Element,
-                Namespace_URI  => +"",
-                Local_Name     => +"token",
-                Qualified_Name => +"token",
-                Location       => Nil_Location));
-         end;
-
-      else
-         Vector.Append
-           ((Kind           => XML.Templates.Streams.Start_Element,
-             Namespace_URI  => +"",
-             Local_Name     => +"node",
-             Qualified_Name => +"node",
-             Attributes     => Common_Attributes,
-             Location       => Nil_Location));
-
-         for J in 1 .. Node.Arity loop
-            Dump (Node.Child (J, Now), Vector);
-         end loop;
-
-         Vector.Append
-           ((Kind           => XML.Templates.Streams.End_Element,
-             Namespace_URI  => +"",
-             Local_Name     => +"node",
-             Qualified_Name => +"node",
-             Location       => Nil_Location));
-      end if;
+      Writer.Set_Output_Destination (Output'Unchecked_Access);
+      Writer.Set_Offset (2);
+      Incr.Debug.Dump (Document, Provider.all, Writer);
+      Result := Output.Get_Text;
    end Dump;
 
    ---------------
@@ -312,13 +205,10 @@ begin
             declare
                use type League.Strings.Universal_String;
 
-               Vector : XML.Templates.Streams.XML_Stream_Element_Vectors.
-                 Vector;
                Text   : League.Strings.Universal_String;
                Expect : League.Strings.Universal_String;
             begin
-               Dump (Document.Ultra_Root, Vector);
-               Text := To_String (Vector);
+               Dump (Document.all, Text);
                Expect := To_String (Command.Dump);
                Ada.Wide_Wide_Text_IO.Put_Line
                  (Text.To_Wide_Wide_String);
