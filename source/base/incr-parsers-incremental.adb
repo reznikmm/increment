@@ -332,6 +332,21 @@ package body Incr.Parsers.Incremental is
                return False;
             end if;
 
+            declare
+               Right : constant Nodes.Tokens.Token_Access :=
+                 Node.Last_Token (Previous);
+               Next  : constant Nodes.Tokens.Token_Access :=
+                 Right.Next_Token (Previous);
+            begin
+               --  Check if lexical analysis cross right edge of Node
+               if Right.Get_Flag (Nodes.Need_Analysis) and
+                 (Next not in null and then
+                  Next.Get_Flag (Nodes.Need_Analysis))
+               then
+                  return False;
+               end if;
+            end;
+
             --  Now see if the parser is willing to accept this isolation, as
             --  determined by the shiftability of its root symbol in the
             --  given state.

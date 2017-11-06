@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<incr>
+  <!--
+Grammar:
+Root ::= [list];
+list ::= {tok};
+tok ::= ident_opt | number_opt;
+
+ident_opt ::= Ident [ Comma Ident <opt_id>];
+number_opt ::= Number [ Comma Number <opt_num>];
+
+Trying error recovery: "a1" -> "a,2"
+list node should be isolated due to extension lexical analysis over right edge
+of ident_opt node.
+-->
+  <names term=" 4" nt=" 6">
+    <name name="Comma"/>
+    <name name="Ident"/>
+    <name name="New_Line"/>
+    <name name="Number"/>
+    <name name="Root"/>
+    <name name="ident_opt"/>
+    <name name="list"/>
+    <name name="number_opt"/>
+    <name name="tok"/>
+    <name name="tok_list"/>
+  </names>
+  <counts> 1 0 3 1 1 0 3 1 1 1 2 1</counts>
+  <nt> 1-2 3-4 5-6 7-8 9-10 11-12</nt>
+  <states count=" 14"> 4 5 6 7 8 9 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 7 12 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</states>
+  <actions> 2 E S3 E S2 S4 S5 S6 S7 S8 S9 8 S10 8 E 8 E 8 E 8 8 E 4 S11 4 E 4 E 4 E 4 4 E F E E E E E E E E E E 9 E 9 E 9 E 9 E 9 9 E 1 E E E E E E E E E E 10 E 10 E 10 E 10 E 10 10 E 12 E 12 E 12 E 12 E 12 12 E 5 E S3 E S2 E S5 E S7 S12 E E E E E S13 E E E E E E E E S14 E E E E E E E E 11 E 11 E 11 E 11 E 11 11 E 7 E 7 E 7 E 7 E 7 7 E 3 E 3 E 3 E 3 E 3 3 E</actions>
+
+  <set-eos-text>a1</set-eos-text>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y'>
+      <token kind='EOF'></token>
+      <null/>
+      <token kind='EOF' lc='y'>a1</token>
+    </node>
+  </dump-tree>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y'>
+      <token kind='EOF' lc='y'/>
+      <node kind='Root' nc='y' lc='y'>
+        <node kind='list' nc='y' lc='y'>
+          <node kind='tok_list' nc='y' lc='y'>
+            <node kind='tok_list' nc='y' lc='y'>
+              <node kind='tok' nc='y' lc='y'>
+                <node kind='ident_opt' nc='y' lc='y'>
+                  <token kind='Ident' lc='y'>a</token>
+                </node>
+              </node>
+            </node>
+            <node kind='tok' nc='y' lc='y'>
+              <node kind='number_opt' nc='y' lc='y'>
+                <token kind='Number' lc='y'>1</token>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+      <token kind='EOF' lc='y'/>
+    </node>
+  </dump-tree>
+  <set-token-text index='3'>,2</set-token-text>
+  <commit/>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y' ne='y'>
+      <token kind='EOF'/>
+      <node kind='Root' nc='y' lc='y' ne='y'>
+        <node kind='list' nc='y' lc='y' ne='y'>
+          <node kind='tok_list' nc='y' ne='y'>
+            <node kind='tok_list' nc='y' ne='y'>
+              <node kind='tok' nc='y' ne='y'>
+                <node kind='ident_opt' nc='y' ne='y'>
+                  <token kind='Ident' lc='y' le='y'>a</token>
+                </node>
+              </node>
+            </node>
+            <node kind='tok' nc='y' ne='y'>
+              <node kind='number_opt' nc='y' ne='y'>
+                <token kind='Number' lc='y' le='y'>,2</token>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+      <token kind='EOF'/>
+    </node>
+  </dump-tree>
+</incr>
