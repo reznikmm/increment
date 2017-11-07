@@ -290,12 +290,14 @@ package body Incr.Nodes.Ultra_Roots is
          Self.BOS := new Nodes.Tokens.Token (Self.Document);
          Nodes.Tokens.Constructors.Initialize_Ancient
            (Self   => Self.BOS.all,
-            Parent => Self'Unchecked_Access);
+            Parent => Self'Unchecked_Access,
+            Back   => 0);
 
          Self.EOS := new Nodes.Tokens.Token (Self.Document);
          Nodes.Tokens.Constructors.Initialize_Ancient
            (Self   => Self.EOS.all,
-            Parent => Self'Unchecked_Access);
+            Parent => Self'Unchecked_Access,
+            Back   => 1);
 
          if Root /= null then
             Nodes.Joints.Constructors.Initialize_Ancient

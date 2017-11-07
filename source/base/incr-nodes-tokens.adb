@@ -42,8 +42,6 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
-with Ada.Characters.Wide_Wide_Latin_1;
-
 package body Incr.Nodes.Tokens is
 
    ------------------
@@ -89,13 +87,14 @@ package body Incr.Nodes.Tokens is
 
       procedure Initialize_Ancient
         (Self    : aliased in out Token'Class;
-         Parent  : Node_Access) is
+         Parent  : Node_Access;
+         Back    : Natural) is
       begin
          Self.Kind := 0;
          Nodes.Constructors.Initialize_Ancient (Self, Parent);
          Versioned_Strings.Initialize
            (Self.Text, League.Strings.Empty_Universal_String);
-         Versioned_Naturals.Initialize (Self.Back, 1);
+         Versioned_Naturals.Initialize (Self.Back, Back);
          Versioned_Naturals.Initialize (Self.Ahead, 1);
          Versioned_Naturals.Initialize (Self.States, 0);
       end Initialize_Ancient;
@@ -260,12 +259,7 @@ package body Incr.Nodes.Tokens is
          when Token_Count =>
             return 1;
          when Line_Count =>
-            if Self'Access = Self.Document.End_Of_Stream then
-               return 1;
-            else
-               return Tokens.Text (Self, Time).Count
-                 (Ada.Characters.Wide_Wide_Latin_1.LF);
-            end if;
+            return Tokens.Text (Self, Time).Count (LF);
       end case;
    end Span;
    -----------

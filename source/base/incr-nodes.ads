@@ -42,6 +42,8 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 
+with Ada.Characters.Wide_Wide_Latin_1;
+
 with Incr.Documents;
 limited with Incr.Nodes.Tokens;
 
@@ -167,6 +169,8 @@ package Incr.Nodes is
       Kind : Span_Kinds;
       Time : Version_Trees.Version) return Natural is abstract;
    --  Length of the node in term of character/line/token count
+
+   LF : constant Wide_Wide_Character := Ada.Characters.Wide_Wide_Latin_1.LF;
 
    function First_Token
      (Self : aliased in out Node'Class;

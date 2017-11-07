@@ -108,7 +108,8 @@ package Incr.Nodes.Tokens is
 
       procedure Initialize_Ancient
         (Self    : aliased in out Token'Class;
-         Parent  : Node_Access);
+         Parent  : Node_Access;
+         Back    : Natural);
       --  Initialize Self as token existent in initial version of the document.
    end Constructors;
 
