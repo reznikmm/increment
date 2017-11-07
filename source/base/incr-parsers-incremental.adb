@@ -210,6 +210,7 @@ package body Incr.Parsers.Incremental is
          Self.Top := Self.Top + 1;
          Self.State (Self.Top) := State;
          Self.Node (Self.Top) := Node;
+         Node.Set_Local_Errors (False);
       end Push;
 
       -------------
@@ -259,7 +260,8 @@ package body Incr.Parsers.Incremental is
          --  Isolate the argument and recursively recover the subtree that it
          --  roots.
 
-         procedure Discard_Changes_And_Mark_Errors (Node : Nodes.Node_Access);
+         procedure Discard_Changes_And_Mark_Errors
+           (Node : access Nodes.Node'Class);
 
          Jam_Offset : Natural;
 
@@ -268,7 +270,7 @@ package body Incr.Parsers.Incremental is
          -------------------------------------
 
          procedure Discard_Changes_And_Mark_Errors
-           (Node : Nodes.Node_Access) is
+           (Node : access Nodes.Node'Class) is
          begin
             Node.Discard;
 
@@ -481,6 +483,8 @@ package body Incr.Parsers.Incremental is
          end if;
 
          Isolate (Node, 2);
+         Discard_Changes_And_Mark_Errors (Document.Start_Of_Stream);
+         Discard_Changes_And_Mark_Errors (Document.End_Of_Stream);
       end Recover_2;
 
       ---------------------
@@ -514,8 +518,7 @@ package body Incr.Parsers.Incremental is
       EOF    : Boolean := False;
       Term   : Nodes.Tokens.Token_Access;
 
-      LA     : access Nodes.Node'Class :=
-        Document.Start_Of_Stream.Next_Subtree (Reference);
+      LA     : access Nodes.Node'Class := Document.Start_Of_Stream;
       Next   : Action;
    begin
       Document.Start_Of_Stream.Set_Text
@@ -526,6 +529,10 @@ package body Incr.Parsers.Incremental is
       Lexer.Prepare_Document (Document, Reference);
       Clear (Stack);
       Push (Stack, State, Nodes.Node_Access (Document.Start_Of_Stream));
+
+      if not LA.Get_Flag (Nodes.Need_Analysis) then
+         LA := LA.Next_Subtree (Reference);
+      end if;
 
       loop
          if LA.Is_Token then

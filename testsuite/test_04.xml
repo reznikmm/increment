@@ -50,7 +50,7 @@ Trying error recovery: "a,1" -> "2,1" -> "b,1"
   <commit/>
   <dump-tree>
     <node kind='EOF' nc='y' ne='y'>
-      <token kind='EOF' lc='y'/>
+      <token kind='EOF' lc='y' le='y'/>
       <node kind='root' nc='y' ne='y'>
         <node kind='row' nc='y' ne='y'>
           <token kind='Ident' lc='y' le='y'>2</token>
