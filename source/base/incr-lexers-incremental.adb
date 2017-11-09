@@ -175,7 +175,6 @@ package body Incr.Lexers.Incremental is
       --  Self.New_State defined in Next_New_Token
 
       Self.Prev_Token := (null, null);
-      Self.Last_Reused := null;
       Self.Token := Token;
       Self.Count := 0;
       Self.Text := Self.Token.Text (Self.Previous);
@@ -204,7 +203,7 @@ package body Incr.Lexers.Incremental is
             return Batch_Lexers.End_Of_Input;
          end if;
 
-         if Self.Token /= Self.Last_Reused then
+         if not Self.Token.Get_Flag (Nodes.Bottom_Up_Reused) then
             Self.Prev_Token (1) := Self.Prev_Token (2);
             Self.Prev_Token (2) := Self.Token;
          end if;
@@ -242,7 +241,7 @@ package body Incr.Lexers.Incremental is
          return False;
       end if;
 
-      if Token = Self.Last_Reused then
+      if Token.Get_Flag (Nodes.Bottom_Up_Reused) then
          return False;
       end if;
 
@@ -316,7 +315,7 @@ package body Incr.Lexers.Incremental is
       begin
          return Token /= null
            and then Token.Kind = Nodes.Token_Kind (Rule)
-           and then Token /= Self.Last_Reused;
+           and then not Token.Get_Flag (Nodes.Bottom_Up_Reused);
       end Could_Be_Reused;
 
       Value  : League.Strings.Universal_String;
@@ -335,7 +334,7 @@ package body Incr.Lexers.Incremental is
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
          Self.Prev_Token (1) := null;
-         Self.Last_Reused := Result;
+         Result.Set_Flag (Nodes.Bottom_Up_Reused);
       elsif Could_Be_Reused (Self.Prev_Token (2), Rule) then
          Result := Self.Prev_Token (2);
          Result.Set_Text (Value);
@@ -343,14 +342,14 @@ package body Incr.Lexers.Incremental is
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
          Self.Prev_Token := (null, null);
-         Self.Last_Reused := Result;
+         Result.Set_Flag (Nodes.Bottom_Up_Reused);
       elsif Could_Be_Reused (Self.Token, Rule) then
          Result := Self.Token;
          Result.Set_Text (Value);
          Result.Set_Local_Errors (False);
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
-         Self.Last_Reused := Result;
+         Result.Set_Flag (Nodes.Bottom_Up_Reused);
       else
          Result := new Nodes.Tokens.Token (Self.Document);
 

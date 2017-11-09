@@ -124,7 +124,6 @@ private
       Previous    : Version_Trees.Version;  --  Version to analyze
       Token       : Nodes.Tokens.Token_Access;
       Prev_Token  : Token_Pair;
-      Last_Reused : Nodes.Tokens.Token_Access;
       Count       : Integer;  --  Number of chars piped before Token
       State       : Batch_Lexers.State;  --  Lexer State before Token
       New_State   : Batch_Lexers.State;  --  State after Xxx_New_Token

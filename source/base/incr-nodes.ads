@@ -146,10 +146,11 @@ package Incr.Nodes is
       Time  : Version_Trees.Version) return Boolean is abstract;
    --  Check if given node still exist at given time/version.
 
-   type Transient_Flags is (Need_Analysis);
+   type Transient_Flags is (Need_Analysis, Bottom_Up_Reused);
    --  These flags valid only at changing version and reset by commit.
    --
    --  @value Need_Analysis mark nodes to analyse them latter
+   --  @value Bottom_Up_Reused mark reused nodes
 
    not overriding function Get_Flag
      (Self  : Node;
@@ -216,7 +217,7 @@ private
    No_Flags : constant Flag_Array := (others => False);
 
    Local_Changes_Mask : constant Flag_Array :=
-     (Need_Analysis => True);
+     (Need_Analysis => True, Bottom_Up_Reused => False);
 
    package Versioned_Booleans is new Version_Trees.Versioned_Values (Boolean);
    package Versioned_Nodes is new Version_Trees.Versioned_Values (Node_Access);
