@@ -202,17 +202,21 @@ package body Incr.Nodes.Ultra_Roots is
    -- On_Commit --
    ---------------
 
-   overriding procedure On_Commit (Self : in out Ultra_Root) is
+   overriding procedure On_Commit
+     (Self   : in out Ultra_Root;
+      Parent : Node_Access)
+   is
       Root : constant Node_Access :=
         Versioned_Nodes.Get (Self.Root, Self.Document.History.Changing);
    begin
-      Self.BOS.On_Commit;
+      pragma Assert (Parent = null);
+      Self.BOS.On_Commit (Self'Unchecked_Access);
 
       if Root /= null then
-         Root.On_Commit;
+         Root.On_Commit (Self'Unchecked_Access);
       end if;
 
-      Self.EOS.On_Commit;
+      Self.EOS.On_Commit (Self'Unchecked_Access);
    end On_Commit;
 
    ------------

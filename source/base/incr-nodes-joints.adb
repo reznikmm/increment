@@ -160,7 +160,10 @@ package body Incr.Nodes.Joints is
    -- On_Commit --
    ---------------
 
-   overriding procedure On_Commit (Self : in out Joint) is
+   overriding procedure On_Commit
+     (Self   : in out Joint;
+      Parent : Node_Access)
+   is
       Now  : constant Version_Trees.Version := Self.Document.History.Changing;
       Child  : Nodes.Node_Access;
       Errors : Boolean := False;
@@ -172,7 +175,7 @@ package body Incr.Nodes.Joints is
          Time    => Self.Document.History.Changing,
          Changes => Ignore);
 
-      Node_With_Parent (Self).On_Commit;
+      Node_With_Parent (Self).On_Commit (Parent);
 
       for J in Self.Kids'Range loop
          Child := Self.Child (J, Now);

@@ -199,7 +199,9 @@ package Incr.Nodes is
 
    --  Internal subprograms:
 
-   not overriding procedure On_Commit (Self : in out Node) is abstract;
+   not overriding procedure On_Commit
+     (Self   : in out Node;
+      Parent : Node_Access) is abstract;
 
    not overriding procedure On_Nested_Changes
      (Self : in out Node;
@@ -257,7 +259,9 @@ private
       Flag  : Transient_Flags;
       Value : Boolean := True);
 
-   overriding procedure On_Commit (Self : in out Node_With_Exist);
+   overriding procedure On_Commit
+     (Self   : in out Node_With_Exist;
+      Parent : Node_Access);
 
    overriding function Local_Changes
      (Self : Node_With_Exist;

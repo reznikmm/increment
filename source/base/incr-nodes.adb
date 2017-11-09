@@ -266,12 +266,16 @@ package body Incr.Nodes is
    -- On_Commit --
    ---------------
 
-   overriding procedure On_Commit (Self : in out Node_With_Exist) is
+   overriding procedure On_Commit
+     (Self   : in out Node_With_Exist;
+      Parent : Node_Access)
+   is
       Now   : constant Version_Trees.Version := Self.Document.History.Changing;
       This  : constant Node_Access := Self'Unchecked_Access;
       Child : Node_Access;
       Diff  : Integer := 0;  --  Ignore this diff
    begin
+      pragma Assert (Node'Class (Self).Parent (Now) = Parent);
       Versioned_Booleans.Set (Self.LC, Self.Local_Changes > 0, Now, Diff);
       Self.Nested_Changes := 0;
       Self.Local_Changes := 0;
@@ -281,7 +285,7 @@ package body Incr.Nodes is
          Child := This.Child (J, Now);
 
          if Child /= null then
-            Child.On_Commit;
+            Child.On_Commit (Self'Unchecked_Access);
          end if;
       end loop;
    end On_Commit;

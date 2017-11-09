@@ -67,7 +67,7 @@ package body Incr.Documents is
    not overriding procedure Commit (Self : in out Document) is
       Next : Version_Trees.Version;
    begin
-      Self.Ultra_Root.On_Commit;
+      Self.Ultra_Root.On_Commit (null);
       Self.History.Start_Change (Self.History.Changing, Next);
    end Commit;
 

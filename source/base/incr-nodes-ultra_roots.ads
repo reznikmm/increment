@@ -113,7 +113,9 @@ private
       Flag  : Transient_Flags;
       Value : Boolean := True) is null;
 
-   overriding procedure On_Commit (Self : in out Ultra_Root);
+   overriding procedure On_Commit
+     (Self   : in out Ultra_Root;
+      Parent : Node_Access);
 
    overriding procedure On_Nested_Changes
      (Self : in out Ultra_Root;

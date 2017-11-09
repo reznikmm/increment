@@ -72,6 +72,8 @@ private
 
    overriding procedure Discard (Self  : in out Joint);
 
-   overriding procedure On_Commit (Self : in out Joint);
+   overriding procedure On_Commit
+     (Self   : in out Joint;
+      Parent : Node_Access);
 
 end Incr.Nodes.Joints;
