@@ -18,4 +18,6 @@ check: all
 	.objs/tests-driver testsuite/test_02.xml
 	.objs/tests-driver testsuite/test_03.xml
 	.objs/tests-driver testsuite/test_04.xml
+	.objs/tests-driver testsuite/test_05.xml
+	.objs/tests-driver testsuite/test_06.xml
 	@echo Tests OK!

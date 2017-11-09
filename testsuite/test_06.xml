@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<incr>
+  <!--
+Grammar:
+Root ::= [list];
+list ::= {tok};
+tok ::= Comma | Ident;
+
+Trying token reuse case: "a," -> "a,,"
+-->
+  <names term=" 4" nt=" 4">
+    <name name="Comma"/>
+    <name name="Ident"/>
+    <name name="New_Line"/>
+    <name name="Number"/>
+    <name name="Root"/>
+    <name name="list"/>
+    <name name="tok"/>
+    <name name="tok_list"/>
+  </names>
+  <counts> 1 0 1 0 1 1 2 1</counts>
+  <nt> 1-2 3-4 5-6 7-8</nt>
+  <states count=" 8"> 4 5 6 7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8 0 0 0 0 0</states>
+  <actions> 2 S3 S2 E E S4 S5 S6 S7 6 6 6 E E E E 6 E 5 5 5 E E E E 5 E F E E E E E E E E 1 E E E E E E E E 8 8 8 E E E E 8 E 3 S3 S2 E E E E S8 E 7 7 7 E E E E 7 E</actions>
+
+  <set-eos-text>a,</set-eos-text>
+  <commit/>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y'>
+      <token kind='EOF' lc='y'/>
+      <node kind='Root' nc='y' lc='y'>
+        <node kind='list' nc='y' lc='y'>
+          <node kind='tok_list' nc='y' lc='y'>
+            <node kind='tok_list' nc='y' lc='y'>
+              <node kind='tok' nc='y' lc='y'>
+                <token kind='Ident' lc='y'>a</token>
+              </node>
+            </node>
+            <node kind='tok' nc='y' lc='y'>
+              <token kind='Comma' lc='y'>,</token>
+            </node>
+          </node>
+        </node>
+      </node>
+      <token kind='EOF' lc='y'/>
+    </node>
+  </dump-tree>
+  <set-token-text index='2'>a,</set-token-text>
+  <commit/>
+  <run/>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y' lc='y'>
+      <token kind='EOF' lc='y'/>
+      <node kind='Root' nc='y' lc='y'>
+        <node kind='list' nc='y' lc='y'>
+          <node kind='tok_list' nc='y' lc='y'>
+            <node kind='tok_list' nc='y' lc='y'>
+              <node kind='tok_list' nc='y' lc='y'>
+                <node kind='tok' nc='y' lc='y'>
+                  <token kind='Ident' lc='y'>a</token>
+                </node>
+              </node>
+              <node kind='tok' lc='y'>
+                <token kind='Comma'>,</token>
+              </node>
+            </node>
+            <node kind='tok' nc='y' lc='y'>
+              <token kind='Comma' lc='y'>,</token>
+            </node>
+          </node>
+        </node>
+      </node>
+      <token kind='EOF'/>
+    </node>
+  </dump-tree>
+  <set-token-text index='3'>,p</set-token-text>
+  <commit/>
+  <dump-tree>
+    <node kind='EOF' nc='y'>
+      <token kind='EOF'/>
+      <node kind='Root' nc='y'>
+        <node kind='list' nc='y'>
+          <node kind='tok_list' nc='y'>
+            <node kind='tok_list' nc='y'>
+              <node kind='tok_list'>
+                <node kind='tok'>
+                  <token kind='Ident'>a</token>
+                </node>
+              </node>
+              <node kind='tok' nc='y'>
+                <token kind='Comma' lc='y'>,p</token>
+              </node>
+            </node>
+            <node kind='tok'>
+              <token kind='Comma'>,</token>
+            </node>
+          </node>
+        </node>
+      </node>
+      <token kind='EOF'/>
+    </node>
+  </dump-tree>
+</incr>

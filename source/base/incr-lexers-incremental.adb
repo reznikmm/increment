@@ -242,6 +242,10 @@ package body Incr.Lexers.Incremental is
          return False;
       end if;
 
+      if Token = Self.Last_Reused then
+         return False;
+      end if;
+
       return True;
    end Is_Synchronized;
 
@@ -331,6 +335,7 @@ package body Incr.Lexers.Incremental is
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
          Self.Prev_Token (1) := null;
+         Self.Last_Reused := Result;
       elsif Could_Be_Reused (Self.Prev_Token (2), Rule) then
          Result := Self.Prev_Token (2);
          Result.Set_Text (Value);
@@ -338,13 +343,14 @@ package body Incr.Lexers.Incremental is
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
          Self.Prev_Token := (null, null);
+         Self.Last_Reused := Result;
       elsif Could_Be_Reused (Self.Token, Rule) then
-         Self.Last_Reused := Self.Token;
          Result := Self.Token;
          Result.Set_Text (Value);
          Result.Set_Local_Errors (False);
 --           Result.Set_State (Self.New_State);
 --           Result.Set_Lookahead (Self.Batch.Get_Token_Lookahead);
+         Self.Last_Reused := Result;
       else
          Result := new Nodes.Tokens.Token (Self.Document);
 
