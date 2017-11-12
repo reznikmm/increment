@@ -1,3 +1,9 @@
+--  Copyright (c) 2015-2017 Maxim Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: MIT
+--  License-Filename: LICENSE
+-------------------------------------------------------------
+
 with Incr.Documents;
 with Incr.Nodes;
 with Incr.Parsers.Incremental;

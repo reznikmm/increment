@@ -1,3 +1,9 @@
+--  Copyright (c) 2015-2017 Maxim Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: MIT
+--  License-Filename: LICENSE
+-------------------------------------------------------------
+
 with Ada.Characters.Wide_Wide_Latin_1;
 with Ada.Wide_Wide_Text_IO;
 

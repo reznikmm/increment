@@ -1,3 +1,9 @@
+--  Copyright (c) 2015-2017 Maxim Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: MIT
+--  License-Filename: LICENSE
+-------------------------------------------------------------
+
 package Incr.Nodes.Joints is
 
    type Joint (Document : Documents.Document_Access;
