@@ -42,31 +42,32 @@
 
 with Ada.Command_Line;
 
-with Gela.Grammars.Constructors;
-with Gela.Grammars.LR.LALR;
-with Gela.Grammars.LR_Tables;
-with Gela.Grammars.Reader;
-with Gela.Grammars_Convertors;
-with Gela.Grammars_Debug;
+with Anagram.Grammars.Constructors;
+with Anagram.Grammars.LR.LALR;
+with Anagram.Grammars.LR_Tables;
+with Anagram.Grammars.Reader;
+with Anagram.Grammars_Convertors;
+with Anagram.Grammars_Debug;
 
 with Gen.Write_Parser_Data;
 with Gen.Write_XML;
 
 procedure Gen.Driver is
    File : constant String := Ada.Command_Line.Argument (1);
-   G : constant Gela.Grammars.Grammar := Gela.Grammars.Reader.Read (File);
-   Plain : constant Gela.Grammars.Grammar :=
-     Gela.Grammars_Convertors.Convert (G, False);
-   AG : constant Gela.Grammars.Grammar :=
-     Gela.Grammars.Constructors.To_Augmented (Plain);
-   Table : constant Gela.Grammars.LR_Tables.Table_Access :=
-     Gela.Grammars.LR.LALR.Build (AG, False);
+   G : constant Anagram.Grammars.Grammar :=
+     Anagram.Grammars.Reader.Read (File);
+   Plain : constant Anagram.Grammars.Grammar :=
+     Anagram.Grammars_Convertors.Convert (G, False);
+   AG : constant Anagram.Grammars.Grammar :=
+     Anagram.Grammars.Constructors.To_Augmented (Plain);
+   Table : constant Anagram.Grammars.LR_Tables.Table_Access :=
+     Anagram.Grammars.LR.LALR.Build (AG, False);
 begin
    if Ada.Command_Line.Argument_Count = 1 then
       Gen.Write_Parser_Data (Plain, Table.all);
    elsif Ada.Command_Line.Argument_Count = 2 then
       Gen.Write_XML (Ada.Command_Line.Argument (2), Plain, Table.all);
    elsif Ada.Command_Line.Argument_Count > 2 then
-      Gela.Grammars_Debug.Print_Conflicts (AG, Table.all);
+      Anagram.Grammars_Debug.Print_Conflicts (AG, Table.all);
    end if;
 end Gen.Driver;

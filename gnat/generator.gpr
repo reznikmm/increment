@@ -42,8 +42,8 @@
 --  $Revision$ $Date$
 ------------------------------------------------------------------------------
 with "matreshka_league";
-with "gela_grammars";
-with "ada_output";
+with "anagram";
+with "ada_pretty";
 
 project Generator is
 

@@ -1,7 +1,7 @@
 with Ada.Wide_Wide_Text_IO;
 
-with Gela.Grammars.LR;
-with Gela.Grammars.LR_Tables;
+with Anagram.Grammars.LR;
+with Anagram.Grammars.LR_Tables;
 
 with League.Strings;
 
@@ -11,8 +11,8 @@ with XML.SAX.Pretty_Writers;
 
 procedure Gen.Write_XML
   (Name  : String;
-   Plain : Gela.Grammars.Grammar;
-   Table : Gela.Grammars.LR_Tables.Table)
+   Plain : Anagram.Grammars.Grammar;
+   Table : Anagram.Grammars.LR_Tables.Table)
 is
 
    function "+" (Text : Wide_Wide_String)
@@ -37,13 +37,13 @@ is
    procedure Write_Actions
      (Writer : in out XML.SAX.Pretty_Writers.XML_Pretty_Writer)
    is
-      use Gela.Grammars.LR_Tables;
+      use Anagram.Grammars.LR_Tables;
    begin
       Writer.Start_Element (+"actions");
       for State in 1 .. Last_State (Table) loop
          for Term in 0 .. Plain.Last_Terminal loop
             declare
-               S    : constant Gela.Grammars.LR.State_Count :=
+               S    : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, Term);
                R    : constant Reduce_Iterator := Reduce (Table, State, Term);
             begin
@@ -52,14 +52,14 @@ is
                elsif S not in 0 then
                   declare
                      Text : constant Wide_Wide_String :=
-                       Gela.Grammars.LR.State_Count'Wide_Wide_Image (S);
+                       Anagram.Grammars.LR.State_Count'Wide_Wide_Image (S);
                   begin
                      Writer.Characters (+" S");
                      Writer.Characters (+Text (2 .. Text'Last));
                   end;
                elsif not Is_Empty (R) then
                   Writer.Characters
-                    (Gela.Grammars.Production_Index'Wide_Wide_Image
+                    (Anagram.Grammars.Production_Index'Wide_Wide_Image
                        (Production (R)));
                else
                   Writer.Characters (+" E");
@@ -69,21 +69,21 @@ is
 
          for NT in 1 .. Plain.Last_Non_Terminal loop
             declare
-               S    : constant Gela.Grammars.LR.State_Count :=
+               S    : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, NT);
                R    : constant Reduce_Iterator := Reduce (Table, State, NT);
             begin
                if S not in 0 then
                   declare
                      Text : constant Wide_Wide_String :=
-                       Gela.Grammars.LR.State_Count'Wide_Wide_Image (S);
+                       Anagram.Grammars.LR.State_Count'Wide_Wide_Image (S);
                   begin
                      Writer.Characters (+" S");
                      Writer.Characters (+Text (2 .. Text'Last));
                   end;
                elsif not Is_Empty (R) then
                   Writer.Characters
-                    (Gela.Grammars.Production_Index'Wide_Wide_Image
+                    (Anagram.Grammars.Production_Index'Wide_Wide_Image
                        (Production (R)));
                else
                   Writer.Characters (+" E");
@@ -101,12 +101,12 @@ is
    procedure Write_Counts
      (Writer : in out XML.SAX.Pretty_Writers.XML_Pretty_Writer)
    is
-      use type Gela.Grammars.Part_Count;
+      use type Anagram.Grammars.Part_Count;
    begin
       Writer.Start_Element (+"counts");
       for Prod of Plain.Production loop
          Writer.Characters
-           (+Gela.Grammars.Part_Count'Wide_Wide_Image
+           (+Anagram.Grammars.Part_Count'Wide_Wide_Image
               (Prod.Last - Prod.First + 1));
       end loop;
       Writer.End_Element (+"counts");
@@ -124,10 +124,11 @@ is
    begin
       Names.Set_Value
         (+"term",
-         +Gela.Grammars.Terminal_Count'Wide_Wide_Image (Plain.Last_Terminal));
+         +Anagram.Grammars.Terminal_Count'Wide_Wide_Image
+           (Plain.Last_Terminal));
       Names.Set_Value
         (+"nt",
-         +Gela.Grammars.Non_Terminal_Count'Wide_Wide_Image
+         +Anagram.Grammars.Non_Terminal_Count'Wide_Wide_Image
            (Plain.Last_Non_Terminal));
       Writer.Start_Element (+"names", Names);
       Names.Clear;
@@ -153,7 +154,7 @@ is
       Writer.Start_Element (+"nt");
       for NT of Plain.Non_Terminal loop
          Writer.Characters
-           (+Gela.Grammars.Production_Index'Wide_Wide_Image (NT.First));
+           (+Anagram.Grammars.Production_Index'Wide_Wide_Image (NT.First));
          Writer.Characters
            (+Integer'Wide_Wide_Image (-Positive (NT.Last)));
       end loop;
@@ -163,22 +164,22 @@ is
    procedure Write_States
      (Writer : in out XML.SAX.Pretty_Writers.XML_Pretty_Writer)
    is
-      use Gela.Grammars.LR_Tables;
+      use Anagram.Grammars.LR_Tables;
       List : XML.SAX.Attributes.SAX_Attributes;
    begin
       List.Set_Value
         (+"count",
-         +Gela.Grammars.LR.State_Count'Wide_Wide_Image
+         +Anagram.Grammars.LR.State_Count'Wide_Wide_Image
            (Last_State (Table)));
       Writer.Start_Element (+"states", List);
       for State in 1 .. Last_State (Table) loop
          for NT in 1 .. Plain.Last_Non_Terminal loop
             declare
-               S : constant Gela.Grammars.LR.State_Count :=
+               S : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, NT);
             begin
                Writer.Characters
-                 (+Gela.Grammars.LR.State_Count'Wide_Wide_Image (S));
+                 (+Anagram.Grammars.LR.State_Count'Wide_Wide_Image (S));
             end;
          end loop;
       end loop;

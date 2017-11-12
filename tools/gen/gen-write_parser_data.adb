@@ -43,45 +43,46 @@
 with Ada.Wide_Wide_Text_IO;
 with Ada.Characters.Wide_Wide_Latin_1;
 
-with Ada_Outputs;
+with Ada_Pretty;
 with League.Strings;
 
-with Gela.Grammars.LR;
-with Gela.Grammars.LR_Tables;
+with Anagram.Grammars.LR;
+with Anagram.Grammars.LR_Tables;
 
 procedure Gen.Write_Parser_Data
-  (Plain : Gela.Grammars.Grammar;
-   Table : Gela.Grammars.LR_Tables.Table)
+  (Plain : Anagram.Grammars.Grammar;
+   Table : Anagram.Grammars.LR_Tables.Table)
 is
 
    function "+" (Text : Wide_Wide_String)
                  return League.Strings.Universal_String
                  renames League.Strings.To_Universal_String;
 
-   function AD_Init return Ada_Outputs.Node_Access;
-   function SD_Init return Ada_Outputs.Node_Access;
-   function CD_Init return Ada_Outputs.Node_Access;
-   function NT_Init return Ada_Outputs.Node_Access;
-   function Name_Case return Ada_Outputs.Node_Access;
-   function To_Kind (Index : Gela.Grammars.Non_Terminal_Index) return Natural;
+   function AD_Init return Ada_Pretty.Node_Access;
+   function SD_Init return Ada_Pretty.Node_Access;
+   function CD_Init return Ada_Pretty.Node_Access;
+   function NT_Init return Ada_Pretty.Node_Access;
+   function Name_Case return Ada_Pretty.Node_Access;
+   function To_Kind
+     (Index : Anagram.Grammars.Non_Terminal_Index) return Natural;
 
-   F : aliased Ada_Outputs.Factory;
+   F : aliased Ada_Pretty.Factory;
    LF : constant Wide_Wide_Character := Ada.Characters.Wide_Wide_Latin_1.LF;
 
    -------------
    -- AD_Init --
    -------------
 
-   function AD_Init return Ada_Outputs.Node_Access is
-      use Gela.Grammars.LR_Tables;
-      List   : Ada_Outputs.Node_Access;
-      List_2 : Ada_Outputs.Node_Access;
+   function AD_Init return Ada_Pretty.Node_Access is
+      use Anagram.Grammars.LR_Tables;
+      List   : Ada_Pretty.Node_Access;
+      List_2 : Ada_Pretty.Node_Access;
    begin
       for State in 1 .. Last_State (Table) loop
          for Term in 0 .. Plain.Last_Terminal loop
             declare
-               Item : Ada_Outputs.Node_Access;
-               S    : constant Gela.Grammars.LR.State_Count :=
+               Item : Ada_Pretty.Node_Access;
+               S    : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, Term);
                R    : constant Reduce_Iterator := Reduce (Table, State, Term);
             begin
@@ -113,8 +114,8 @@ is
 
          for NT in 1 .. Plain.Last_Non_Terminal loop
             declare
-               Item : Ada_Outputs.Node_Access;
-               S    : constant Gela.Grammars.LR.State_Count :=
+               Item : Ada_Pretty.Node_Access;
+               S    : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, NT);
                R    : constant Reduce_Iterator := Reduce (Table, State, NT);
             begin
@@ -157,9 +158,9 @@ is
    -- CD_Init --
    -------------
 
-   function CD_Init return Ada_Outputs.Node_Access is
-      use type Gela.Grammars.Part_Count;
-      List   : Ada_Outputs.Node_Access;
+   function CD_Init return Ada_Pretty.Node_Access is
+      use type Anagram.Grammars.Part_Count;
+      List   : Ada_Pretty.Node_Access;
    begin
       for Prod of Plain.Production loop
          List := F.New_List
@@ -177,8 +178,8 @@ is
    -- Name_Case --
    ---------------
 
-   function Name_Case return Ada_Outputs.Node_Access is
-      List : Ada_Outputs.Node_Access := F.New_Case_Path
+   function Name_Case return Ada_Pretty.Node_Access is
+      List : Ada_Pretty.Node_Access := F.New_Case_Path
         (Choice => F.New_Literal (0),
          List   => F.New_Return (F.New_String_Literal (+"EOF")));
    begin
@@ -213,8 +214,8 @@ is
    -- NT_Init --
    -------------
 
-   function NT_Init return Ada_Outputs.Node_Access is
-      List   : Ada_Outputs.Node_Access;
+   function NT_Init return Ada_Pretty.Node_Access is
+      List   : Ada_Pretty.Node_Access;
    begin
       for NT of Plain.Non_Terminal loop
          List := F.New_List
@@ -233,15 +234,15 @@ is
    -- SD_Init --
    -------------
 
-   function SD_Init return Ada_Outputs.Node_Access is
-      use Gela.Grammars.LR_Tables;
-      List   : Ada_Outputs.Node_Access;
-      List_2 : Ada_Outputs.Node_Access;
+   function SD_Init return Ada_Pretty.Node_Access is
+      use Anagram.Grammars.LR_Tables;
+      List   : Ada_Pretty.Node_Access;
+      List_2 : Ada_Pretty.Node_Access;
    begin
       for State in 1 .. Last_State (Table) loop
          for NT in 1 .. Plain.Last_Non_Terminal loop
             declare
-               S : constant Gela.Grammars.LR.State_Count :=
+               S : constant Anagram.Grammars.LR.State_Count :=
                  Shift (Table, State, NT);
             begin
                List_2 := F.New_List
@@ -268,18 +269,18 @@ is
    -------------
 
    function To_Kind
-     (Index : Gela.Grammars.Non_Terminal_Index) return Natural is
+     (Index : Anagram.Grammars.Non_Terminal_Index) return Natural is
    begin
       return Positive (Plain.Last_Terminal) + Positive (Index);
    end To_Kind;
 
-   Clause : constant Ada_Outputs.Node_Access := F.New_With
+   Clause : constant Ada_Pretty.Node_Access := F.New_With
      (F.New_Selected_Name (+"Incr.Nodes.Joints"));
 
-   Name : constant Ada_Outputs.Node_Access :=
+   Name : constant Ada_Pretty.Node_Access :=
      F.New_Selected_Name (+"Incr.Ada_Parser_Data");
 
-   Rename_List : constant Ada_Outputs.Node_Access :=
+   Rename_List : constant Ada_Pretty.Node_Access :=
      F.New_List
        ((F.New_Variable
           (Name            => F.New_Name (+"S"),
@@ -308,7 +309,7 @@ is
                    Value   => F.New_Selected_Name (+"P.Finish"))),
            Is_Constant     => True)));
 
-   Action_Data : constant Ada_Outputs.Node_Access :=
+   Action_Data : constant Ada_Pretty.Node_Access :=
      F.New_Variable
        (Name            => F.New_Name (+"Action_Data"),
         Type_Definition => F.New_Selected_Name (+"P.Action_Table"),
@@ -316,7 +317,7 @@ is
         Is_Constant     => True,
         Is_Aliased      => True);
 
-   State_Data : constant Ada_Outputs.Node_Access :=
+   State_Data : constant Ada_Pretty.Node_Access :=
      F.New_Variable
        (Name            => F.New_Name (+"State_Data"),
         Type_Definition => F.New_Selected_Name (+"P.State_Table"),
@@ -324,7 +325,7 @@ is
         Is_Constant     => True,
         Is_Aliased      => True);
 
-   Count_Data : constant Ada_Outputs.Node_Access :=
+   Count_Data : constant Ada_Pretty.Node_Access :=
      F.New_Variable
        (Name            => F.New_Name (+"Count_Data"),
         Type_Definition => F.New_Selected_Name (+"P.Parts_Count_Table"),
@@ -332,24 +333,24 @@ is
         Is_Constant     => True,
         Is_Aliased      => True);
 
-   NT : constant Ada_Outputs.Node_Access :=
+   NT : constant Ada_Pretty.Node_Access :=
      F.New_Variable
        (Name            => F.New_Name (+"NT"),
         Type_Definition => F.New_Name (+"Node_Kind_Array"),
         Initialization  => NT_Init,
         Is_Constant     => True);
 
-   Self : constant Ada_Outputs.Node_Access :=
+   Self : constant Ada_Pretty.Node_Access :=
      F.New_Parameter
        (Name            => F.New_Name (+"Self"),
         Type_Definition => F.New_Name (+"Provider"));
 
-   Self_Unreferenced : constant Ada_Outputs.Node_Access :=
+   Self_Unreferenced : constant Ada_Pretty.Node_Access :=
      F.New_Pragma
        (Name      => F.New_Name (+"Unreferenced"),
         Arguments => F.New_Name (+"Self"));
 
-   Actions : constant Ada_Outputs.Node_Access :=
+   Actions : constant Ada_Pretty.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
           (Is_Overriding => True,
@@ -359,7 +360,7 @@ is
         Declarations => Self_Unreferenced,
         Statements => F.New_Return (F.New_Name (+"Action_Data'Access")));
 
-   Kind_Image : constant Ada_Outputs.Node_Access :=
+   Kind_Image : constant Ada_Pretty.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
           (Is_Overriding => True,
@@ -377,7 +378,7 @@ is
           (Expression => F.New_Name (+"Kind"),
            List       => Name_Case));
 
-   Part_Counts : constant Ada_Outputs.Node_Access :=
+   Part_Counts : constant Ada_Pretty.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
           (Is_Overriding => True,
@@ -388,7 +389,7 @@ is
         Declarations => Self_Unreferenced,
         Statements => F.New_Return (F.New_Name (+"Count_Data'Access")));
 
-   States : constant Ada_Outputs.Node_Access :=
+   States : constant Ada_Pretty.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
           (Is_Overriding => True,
@@ -399,10 +400,10 @@ is
         Declarations => Self_Unreferenced,
         Statements => F.New_Return (F.New_Name (+"State_Data'Access")));
 
-   Joint_Access : constant Ada_Outputs.Node_Access := F.New_Selected_Name
+   Joint_Access : constant Ada_Pretty.Node_Access := F.New_Selected_Name
      (+"Incr.Nodes.Joints.Joint_Access");
 
-   Statements : constant Ada_Outputs.Node_Access :=
+   Statements : constant Ada_Pretty.Node_Access :=
      F.New_List
        ((
         F.New_Assignment
@@ -438,7 +439,7 @@ is
               Arguments => F.New_Name (+"Result")))
         ));
 
-   Create_Node : constant Ada_Outputs.Node_Access :=
+   Create_Node : constant Ada_Pretty.Node_Access :=
      F.New_Subprogram_Body
        (F.New_Subprogram_Specification
           (Is_Overriding => True,
@@ -473,18 +474,18 @@ is
            Type_Definition => Joint_Access),
         Statements => Statements);
 
-   Tables : constant Ada_Outputs.Node_Access :=
+   Tables : constant Ada_Pretty.Node_Access :=
      F.New_List
        ((F.New_Pragma (F.New_Name (+"Page")),
         Action_Data, State_Data, Count_Data, NT,
         Actions, Kind_Image, Part_Counts, States, Create_Node));
 
-   List : constant Ada_Outputs.Node_Access := F.New_List (Rename_List, Tables);
+   List : constant Ada_Pretty.Node_Access := F.New_List (Rename_List, Tables);
 
-   Root : constant Ada_Outputs.Node_Access :=
+   Root : constant Ada_Pretty.Node_Access :=
      F.New_Package_Body (Name, List);
 
-   Unit : constant Ada_Outputs.Node_Access :=
+   Unit : constant Ada_Pretty.Node_Access :=
      F.New_Compilation_Unit (Root, Clause);
 begin
    Ada.Wide_Wide_Text_IO.Put_Line
