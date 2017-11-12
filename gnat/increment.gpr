@@ -6,13 +6,17 @@
 
 with "matreshka_league.gpr";
 
-project Increment is
+library project Increment is
 
+   Version := "0.1";
+
+   for Library_Kind use "dynamic";
+   for Library_Name use "incr";
+   for Library_Dir use "../.libs";
+   for Library_ALI_Dir use "../.libs";
+   for Library_Version use "libincr.so." & Version;
    for Object_Dir use "../.objs";
-   for Source_Dirs use
-     ("../source/base", "../source/generated", "../source/ada");
-
---   for Main use ("tests-driver");
+   for Source_Dirs use ("../source/base");
 
    Default_Ada_Switches :=
      ("-gnat12", "-gnatW8", "-g");

@@ -1,6 +1,10 @@
 Incremental analysis in Ada _(increment)_
 =========================================
 
+[![Build Status](https://travis-ci.org/reznikmm/increment.svg)](https://travis-ci.org/reznikmm/increment)
+[![Download](https://api.bintray.com/packages/reznikmm/matreshka/increment/images/download.svg) ](https://bintray.com/reznikmm/matreshka/increment/_latestVersion)
+[![reuse compliant](https://img.shields.io/badge/reuse-compliant-green.svg)](https://reuse.software/)
+
 > Incremental analysis library
 
 This package provides incremental analysis algorithms
@@ -25,9 +29,6 @@ make all install PREFIX=/path/to/install
 ### Dependencies
 It depends on
 * [Matreshka](https://forge.ada-ru.org/matreshka) library.
-* [ada-pretty](https://github.com/reznikmm/ada-pretty) -
-  an Ada Pretty Printer library.
-* [Anagram](https://github.com/reznikmm/anagram) - parser construction library.
 
 ### Usage
 Add `with "increment";` in your project file.

@@ -11,8 +11,8 @@ GPRINSTALL_FLAGS = --prefix=$(PREFIX) --sources-subdir=$(INSTALL_INCLUDE_DIR)\
  --lib-subdir=$(INSTALL_ALI_DIR) --project-subdir=$(INSTALL_PROJECT_DIR)\
 --link-lib-subdir=$(INSTALL_LIBRARY_DIR)
 
-all: source/generated/tests-lexers-tables.adb source/generated/incr-ada_lexers-tables.adb
-	gprbuild -p -P gnat/increment.gpr
+all: source/generated/tests-lexers-tables.adb
+	gprbuild -R -p -P gnat/increment.gpr
 	gprbuild -p -P gnat/increment_tests.gpr
 
 source/generated/tests-lexers-tables.adb: testsuite/test.uaflex
