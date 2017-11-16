@@ -19,7 +19,6 @@ package body Incr.Lexers.Batch_Lexers.Generic_Lexers is
       Pos           : Buffer_Index := 1;
       Current_State : State := Self.Start;
       Char          : Character_Class;
-      Next_Rule     : Rule_Index;
    begin
       if Self.To = 1 and then Self.Buffer (1) = End_Of_Input then
          Result := 0;
@@ -57,14 +56,12 @@ package body Incr.Lexers.Batch_Lexers.Generic_Lexers is
 
          Current_State := Switch (Current_State, Char);
 
-         exit when Current_State = Error_State;
-
-         Next_Rule := Rule (Current_State);
-
-         if Next_Rule /= 0 then
-            Self.Rule := Next_Rule;
+         if Current_State in First_Final .. Error_State - 1 then
+            Self.Rule := Rule (Current_State);
             Self.To := Pos;
          end if;
+
+         exit when Current_State > Last_Looping;
 
          Pos := Pos + 1;
       end loop;

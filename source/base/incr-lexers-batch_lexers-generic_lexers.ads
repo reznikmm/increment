@@ -14,7 +14,9 @@ generic
 
    with function Rule (S : State) return Rule_Index;
 
-   Error_State : State;
+   First_Final  : State;
+   Last_Looping : State;
+   Error_State  : State;
 
 package Incr.Lexers.Batch_Lexers.Generic_Lexers is
    --  @summary

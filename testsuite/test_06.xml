@@ -63,12 +63,12 @@ Trying token reuse case: "a," -> "a,,"
                   <token kind='Ident' lc='y'>a</token>
                 </node>
               </node>
-              <node kind='tok' lc='y'>
-                <token kind='Comma'>,</token>
+              <node kind='tok' nc='y' lc='y'>
+                <token kind='Comma' lc='y'>,</token>
               </node>
             </node>
-            <node kind='tok' nc='y' lc='y'>
-              <token kind='Comma' lc='y'>,</token>
+            <node kind='tok' lc='y'>
+              <token kind='Comma'>,</token>
             </node>
           </node>
         </node>
