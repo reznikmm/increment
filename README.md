@@ -30,7 +30,7 @@ make all install PREFIX=/path/to/install
 It depends on
 * [Matreshka](https://forge.ada-ru.org/matreshka) library.
 
-### Usage
+## Usage
 Add `with "increment";` in your project file.
 
 ## Maintainer

@@ -49,9 +49,9 @@ Trying error recovery: "a,1" -> "ab1" -> "a,1"
   <run/>
   <commit/>
   <dump-tree>
-    <node kind='EOF' nc='y' lc='y' ne='y'>
+    <node kind='EOF' nc='y' ne='y'>
       <token kind='EOF'/>
-      <node kind='root' nc='y' lc='y' ne='y'>
+      <node kind='root' nc='y' ne='y'>
         <node kind='row' nc='y' ne='y'>
           <token kind='Ident' lc='y' le='y'>a</token>
           <token kind='Comma' lc='y' le='y'>b</token>

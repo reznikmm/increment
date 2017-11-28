@@ -70,10 +70,10 @@ of ident_opt node.
   <run/>
   <commit/>
   <dump-tree>
-    <node kind='EOF' nc='y' lc='y' ne='y'>
+    <node kind='EOF' nc='y' ne='y'>
       <token kind='EOF'/>
-      <node kind='Root' nc='y' lc='y' ne='y'>
-        <node kind='list' nc='y' lc='y' ne='y'>
+      <node kind='Root' nc='y' ne='y'>
+        <node kind='list' nc='y' ne='y'>
           <node kind='tok_list' nc='y' ne='y'>
             <node kind='tok_list' nc='y' ne='y'>
               <node kind='tok' nc='y' ne='y'>

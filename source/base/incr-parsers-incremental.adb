@@ -294,6 +294,11 @@ package body Incr.Parsers.Incremental is
             then
                --  The ending offset must meet or exceed the detection point.
                return False;
+            elsif Node.Span (Nodes.Text_Length, Previous) /=
+              Node.Span (Nodes.Text_Length, Now)
+            then
+               --  The subtree span must the same in current and prev versions.
+               return False;
             end if;
 
             declare

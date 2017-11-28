@@ -9,7 +9,7 @@ INSTALL_ALI_DIR        ?= ${INSTALL_LIBRARY_DIR}/increment
 
 GPRINSTALL_FLAGS = --prefix=$(PREFIX) --sources-subdir=$(INSTALL_INCLUDE_DIR)\
  --lib-subdir=$(INSTALL_ALI_DIR) --project-subdir=$(INSTALL_PROJECT_DIR)\
---link-lib-subdir=$(INSTALL_LIBRARY_DIR)
+ --link-lib-subdir=$(INSTALL_LIBRARY_DIR) -f
 
 all: source/generated/tests-lexers-tables.adb
 	gprbuild -R -p -P gnat/increment.gpr
@@ -38,3 +38,8 @@ check: all
 	.objs/tests-driver testsuite/test_05.xml
 	.objs/tests-driver testsuite/test_06.xml
 	@echo Tests OK!
+
+clean:
+	gprclean -q -P gnat/increment.gpr
+	gprclean -q -P gnat/increment_tests.gpr
+
