@@ -204,11 +204,14 @@ package body Incr.Nodes.Ultra_Roots is
       Value : Node_Access)
    is
       Now : constant Version_Trees.Version := Self.Document.History.Changing;
+      Old : constant Node_Access := Self.Child (Index, Now);
 
       Ignore : Integer := 0;
    begin
       if Index /= 2 then
          raise Constraint_Error;
+      elsif Old /= null then
+         Old.Set_Parent (null);
       end if;
 
       Versioned_Nodes.Set (Self.Root, Value, Now, Ignore);

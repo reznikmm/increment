@@ -206,12 +206,30 @@ package body Incr.Nodes.Joints is
    is
       Diff : Integer := 0;
       Now  : constant Version_Trees.Version := Self.Document.History.Changing;
+      Old  : constant Node_Access := Self.Child (Index, Now);
    begin
+      if Old /= null then
+         Old.Set_Parent (null);
+      end if;
+
       Versioned_Nodes.Set (Self.Kids (Index), Value, Now, Diff);
       Self.Update_Local_Changes (Diff);
 
       if Value /= null then
-         Value.Set_Parent (Self'Unchecked_Access);
+         declare
+            Parent : constant Node_Access := Value.Parent (Now);
+         begin
+            if Parent /= null then
+               declare
+                  Index : constant Natural :=
+                    Parent.Child_Index (Constant_Node_Access (Value), Now);
+               begin
+                  Value.Set_Parent (null);
+                  Parent.Set_Child (Index, null);
+                  Value.Set_Parent (Self'Unchecked_Access);
+               end;
+            end if;
+         end;
       end if;
    end Set_Child;
 
