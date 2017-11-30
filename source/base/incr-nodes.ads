@@ -174,6 +174,7 @@ package Incr.Nodes is
 
 private
 
+   type Constant_Node_Access is access constant Node'Class;
    type Flag_Array is array (Transient_Flags) of Boolean with Pack;
 
    No_Flags : constant Flag_Array := (others => False);
@@ -265,5 +266,10 @@ private
          Parent  : Node_Access);
       --  Initialize Self as node existent in initial version of the document.
    end Constructors;
+
+   function Child_Index
+     (Self  : Node'Class;
+      Child : Constant_Node_Access;
+      Time  : Version_Trees.Version) return Natural;
 
 end Incr.Nodes;

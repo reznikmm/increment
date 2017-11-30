@@ -56,6 +56,24 @@ package body Incr.Nodes is
       return Versioned_Booleans.Get (Self.Exist, Time);
    end Exists;
 
+   -----------------
+   -- Child_Index --
+   -----------------
+
+   function Child_Index
+     (Self  : Node'Class;
+      Child : Constant_Node_Access;
+      Time  : Version_Trees.Version) return Natural is
+   begin
+      for J in 1 .. Self.Arity loop
+         if Constant_Node_Access (Self.Child (J, Time)) = Child then
+            return J;
+         end if;
+      end loop;
+
+      return 0;
+   end Child_Index;
+
    --------------------
    -- Discard_Parent --
    --------------------
@@ -196,17 +214,15 @@ package body Incr.Nodes is
      (Self : Node'Class;
       Time : Version_Trees.Version) return Node_Access
    is
-      type Constant_Node_Access is access constant Node'Class;
       Node   : Constant_Node_Access := Self'Unchecked_Access;
       Parent : Node_Access := Node.Parent (Time);
       Child  : Node_Access;
    begin
       while Parent /= null loop
-
-         for J in 1 .. Parent.Arity - 1 loop
-            Child := Parent.Child (J, Time);
-
-            if Constant_Node_Access (Child) = Node then
+         declare
+            J : constant Natural := Parent.Child_Index (Node, Time);
+         begin
+            if J in 1 .. Parent.Arity - 1 then
                for K in J + 1 .. Parent.Arity loop
                   Child := Parent.Child (K, Time);
 
@@ -215,7 +231,7 @@ package body Incr.Nodes is
                   end if;
                end loop;
             end if;
-         end loop;
+         end;
 
          Node := Constant_Node_Access (Parent);
          Parent := Node.Parent (Time);
@@ -273,17 +289,15 @@ package body Incr.Nodes is
      (Self : Node'Class;
       Time : Version_Trees.Version) return Node_Access
    is
-      type Constant_Node_Access is access constant Node'Class;
       Node   : Constant_Node_Access := Self'Unchecked_Access;
       Parent : Node_Access := Node.Parent (Time);
       Child  : Node_Access;
    begin
       while Parent /= null loop
-
-         for J in 2 .. Parent.Arity loop
-            Child := Parent.Child (J, Time);
-
-            if Constant_Node_Access (Child) = Node then
+         declare
+            J : constant Natural := Parent.Child_Index (Node, Time);
+         begin
+            if J in 2 .. Parent.Arity then
                for K in reverse 1 .. J - 1 loop
                   Child := Parent.Child (K, Time);
 
@@ -292,7 +306,7 @@ package body Incr.Nodes is
                   end if;
                end loop;
             end if;
-         end loop;
+         end;
 
          Node := Constant_Node_Access (Parent);
          Parent := Node.Parent (Time);

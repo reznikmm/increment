@@ -44,7 +44,7 @@ package body Incr.Version_Trees is
             end if;
          end loop;
 
-         raise Constraint_Error with "version iss too old";
+         raise Constraint_Error with "version is too old";
       end Get;
 
       ----------------
