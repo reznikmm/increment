@@ -172,6 +172,7 @@ package body Incr.Nodes.Ultra_Roots is
         Versioned_Nodes.Get (Self.Root, Self.Document.History.Changing);
    begin
       pragma Assert (Parent = null);
+      Mark_Deleted_Children (Self);
       Self.BOS.On_Commit (Self'Unchecked_Access);
 
       if Root /= null then

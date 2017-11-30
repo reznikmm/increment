@@ -170,11 +170,18 @@ package body Incr.Nodes.Joints is
      (Self   : in out Joint;
       Parent : Node_Access)
    is
-      Now  : constant Version_Trees.Version := Self.Document.History.Changing;
+      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+
+      Prev   : constant Version_Trees.Version :=
+        Self.Document.History.Parent (Now);
       Child  : Nodes.Node_Access;
       Errors : Boolean := False;
       Ignore : Integer := 0;
    begin
+      if Self.Local_Changes > 0 and then Self.Exists (Prev) then
+         Mark_Deleted_Children (Self);
+      end if;
+
       Versioned_Booleans.Set
         (Self    => Self.NC,
          Value   => Self.Nested_Changes > 0,

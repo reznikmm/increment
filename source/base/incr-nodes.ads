@@ -267,6 +267,10 @@ private
       --  Initialize Self as node existent in initial version of the document.
    end Constructors;
 
+   procedure Mark_Deleted_Children (Self : in out Node'Class);
+   --  Check each child of Self if it is not connected to the tree and mark it
+   --  as non-existent in current version.
+
    function Child_Index
      (Self  : Node'Class;
       Child : Constant_Node_Access;

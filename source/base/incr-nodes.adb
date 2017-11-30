@@ -195,6 +195,107 @@ package body Incr.Nodes is
       return False;
    end Local_Changes;
 
+   ---------------------------
+   -- Mark_Deleted_Children --
+   ---------------------------
+
+   procedure Mark_Deleted_Children (Self : in out Node'Class) is
+
+      function Find_Root (Node : Node_Access) return Node_Access;
+      --  Find top root accessible from the Node
+
+      procedure Delete_Tree
+        (Node   : not null Node_Access;
+         Parent : Node_Access;
+         Index  : Positive);
+      --  Check Node if it's disjointed from ultra-root.
+      --  Delete a subtree rooted from Node if so.
+      --  If Parent /= null also set Parent.Child(Index) to null.
+
+      Now : constant Version_Trees.Version := Self.Document.History.Changing;
+
+      -----------------
+      -- In_The_Tree --
+      -----------------
+
+      function Find_Root (Node : Node_Access) return Node_Access is
+         Child : not null Nodes.Node_Access := Node;
+      begin
+         loop
+            declare
+               Parent : constant Nodes.Node_Access := Child.Parent (Now);
+            begin
+               if Parent = null then
+                  return Child;
+               else
+                  Child := Parent;
+               end if;
+            end;
+         end loop;
+      end Find_Root;
+
+      -----------------
+      -- Delete_Tree --
+      -----------------
+
+      procedure Delete_Tree
+        (Node   : not null Node_Access;
+         Parent : Node_Access;
+         Index  : Positive)
+      is
+         Changes : Integer := 0;
+      begin
+         if not Node.Exists (Now) then
+            return;
+         elsif Node.Parent (Now) /= Parent then
+            declare
+               Root : constant Node_Access := Find_Root (Node);
+            begin
+               if Root = Self.Document.Ultra_Root then
+                  return;
+               end if;
+            end;
+         end if;
+
+         for J in 1 .. Node.Arity loop
+            declare
+               Child : constant Node_Access := Node.Child (J, Now);
+            begin
+               Delete_Tree (Child, Node, J);
+            end;
+         end loop;
+
+         Versioned_Booleans.Set
+           (Node_With_Exist (Node.all).Exist,
+            False,
+            Now,
+            Changes => Changes);
+
+         if Parent /= null then
+            Parent.Set_Child (Index, null);
+         end if;
+      end Delete_Tree;
+
+      Prev   : constant Version_Trees.Version :=
+        Self.Document.History.Parent (Now);
+      Child : Node_Access;
+   begin
+      for J in 1 .. Self.Arity loop
+         Child := Self.Child (J, Prev);
+
+         if Child /= null and then
+           Child.Exists (Now) and then
+           Child.Parent (Now) /= Self'Unchecked_Access
+         then
+            Child := Find_Root (Child);
+
+            if Child /= Self.Document.Ultra_Root then
+               Delete_Tree (Child, null, J);
+            end if;
+         end if;
+      end loop;
+   end Mark_Deleted_Children;
+
    ------------------
    -- Local_Errors --
    ------------------
