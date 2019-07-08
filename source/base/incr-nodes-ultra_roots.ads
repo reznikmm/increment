@@ -103,7 +103,7 @@ private
 
    overriding function Local_Errors
      (Self : Ultra_Root;
-      Time : Version_Trees.Version) return Boolean is (False);
+      Unused : Version_Trees.Version) return Boolean is (False);
 
    overriding procedure Set_Local_Errors
      (Self  : in out Ultra_Root;

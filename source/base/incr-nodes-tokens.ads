@@ -111,7 +111,7 @@ private
 
    overriding function Nested_Errors
      (Self : Token;
-      Time : Version_Trees.Version) return Boolean is (False);
+      Unused : Version_Trees.Version) return Boolean is (False);
 
    overriding function Span
      (Self : aliased in out Token;
