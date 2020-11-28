@@ -14,6 +14,7 @@ Source0:    increment.tar.gz
 BuildRequires:   gcc-gnat
 BuildRequires:   fedora-gnat-project-common  >= 3 
 BuildRequires:   matreshka-devel
+BuildRequires:   matreshka-xml-devel
 BuildRequires:   gprbuild
 
 # gprbuild only available on these:

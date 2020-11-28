@@ -1,0 +1,27 @@
+on:
+  push:
+    branches:
+      - master
+name: Build
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and deploy RPM
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: increment
+      - uses: reznikmm/fedora-ada-action@v3
+        with:
+          spec: increment/packages/travis/increment.spec
+      - name: Upload tar-ball to Bintray
+        uses: reznikmm/upload-bintray-action@v3
+        with:
+          subject: reznikmm
+          repository: matreshka
+          package: increment
+          version: head-fc33
+          sourcePath: x86_64/*
+          override: 1
+          username: reznikmm
+          apiKey: ${{secrets.BINTRAY_API_KEY}}

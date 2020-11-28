@@ -1,8 +1,8 @@
 Incremental analysis in Ada _(increment)_
 =========================================
 
-[![Build Status](https://travis-ci.org/reznikmm/increment.svg)](https://travis-ci.org/reznikmm/increment)
-[![Download](https://api.bintray.com/packages/reznikmm/matreshka/increment/images/download.svg) ](https://bintray.com/reznikmm/matreshka/increment/_latestVersion)
+[![Build](https://github.com/reznikmm/increment/workflows/Build/badge.svg)](https://github.com/reznikmm/increment/actions)
+[![Download](https://api.bintray.com/packages/reznikmm/matreshka/increment/images/download.svg)](https://bintray.com/reznikmm/matreshka/increment/_latestVersion)
 [![reuse compliant](https://img.shields.io/badge/reuse-compliant-green.svg)](https://reuse.software/)
 
 > Incremental analysis library
